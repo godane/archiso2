@@ -8,6 +8,20 @@ export LABEL="ARCH_$(date +%Y%m)"
 PUBLISHER="Arch Linux <http://www.archlinux.org>"
 APPLICATION="Arch Linux Live/Rescue CD"
 CREATE_DEFAULT="n"
+PROFILE=$(pwd)
+ROOT_MOD="$(ls -1 ${PROFILE}/list | head -1)"
+VMLINUZ="boot/vmlinuz26"
+MAP26="boot/System.map26"
+KERNEL="/etc/mkinitcpio.d/kernel26.kver"
+CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
+
+error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
+warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
+info () { echo -e "\033[1;32;40m>>> \033[1;37;40m$@\033[1;0m"; }
+
+if [ -f ${PROFILE}/config ]; then
+	source ${PROFILE}/config
+fi
 
 APPNAME=$(basename "${0}")
 
@@ -19,6 +33,7 @@ usage ()
     echo "    -f               Force overwrite of working files/squashfs image/bootable image"
     echo "    -p PACKAGE(S)    Additional package(s) to install, can be used multiple times"
     echo "    -C <file>        Config file for pacman. Default $PACCONFIG"
+    echo "    -M <modules>     Squashfs modules of iso."
     echo "    -L <label>       Set a label for the disk"
     echo "    -P <publisher>   Set a publisher for the disk"
     echo "    -A <application> Set an application name for the disk"
@@ -34,11 +49,12 @@ usage ()
     exit $1
 }
 
-while getopts 'p:C:L:P:A:dfvh' arg; do
+while getopts 'p:C:M:L:P:A:dfvh' arg; do
     case "${arg}" in
         p) PKGLIST="${PKGLIST} ${OPTARG}" ;;
         C) PACCONFIG="${OPTARG}" ;;
     	L) LABEL="${OPTARG}" ;;
+        M) MODULES="${OPTARG}" ;;
     	P) PUBLISHER="${OPTARG}" ;;
     	A) APPLICATION="${OPTARG}" ;;
         d) CREATE_DEFAULT="y" ;;
@@ -56,12 +72,12 @@ shift $(($OPTIND - 1))
 
 # do UID checking here so someone can at least get usage instructions
 if [ "$EUID" != "0" ]; then
-    echo "error: This script must be run as root."
+    error "error: This script must be run as root."
     exit 1
 fi
 
 if [ ! -f "$PACCONFIG" ]; then
-    echo "error: pacman config file '$PACCONFIG' does not exist"
+    error "error: pacman config file '$PACCONFIG' does not exist"
     exit 1
 fi
 
@@ -72,11 +88,20 @@ imgname=""
 case "${command_name}" in
     create) work_dir="${2}"; imgname="none" ;;
     iso) work_dir="${2}"; imgname="${3}" ;;
+    all) work_dir="${2}"; imgname="${3}" ;;
     *) echo "invalid command name '${command_name}'"; usage 1 ;;
 esac
 
-[ "x${imgname}" = "x" ] && echo "Image name must be specified" && usage 1
-[ "x${work_dir}" = "x" ] && echo "Please specify a working directory" && usage 1
+[ "x${imgname}" = "x" ] && warn "Image name must be specified" && usage 1
+[ "x${work_dir}" = "x" ] && warn "Please specify a working directory" && usage 1
+
+rootimg_dir="${work_dir}/root-image" # union folder
+iso_dir="${work_dir}/iso" # iso folder
+isomodules_dir="${work_dir}/iso/modules" # place to put squashfs images of modules for union
+modules_dir="${work_dir}/modules" # make modules in here
+lastbr_dir="${work_dir}/empty"
+overlay_dir="${work_dir}/modules/overlay"
+INSTROOT="${modules_dir}/$(basename ${ROOT_MOD} .list)"
 
 echo "${APPNAME} : Configuration Settings"
 echo "        working directory:   ${work_dir}"
@@ -87,10 +112,10 @@ _pacman ()
 {
     local ret
     if [ "${QUIET}" = "y" ]; then
-        mkarchroot -C "$PACCONFIG" -f "${work_dir}/root-image" $* 2>&1 >/dev/null
+        mkarchroot -C "$PACCONFIG" -f "$rootimg_dir" $* 2>&1 >/dev/null
         ret=$?
     else
-        mkarchroot -C "$PACCONFIG" -f "${work_dir}/root-image" $*
+        mkarchroot -C "$PACCONFIG" -f "$rootimg_dir" $*
         ret=$?
     fi
 
@@ -102,10 +127,82 @@ _pacman ()
     fi
 }
 
+_kversion ()
+{
+	if [ -f ${INSTROOT}${KERNEL} ]; then
+		source ${INSTROOT}${KERNEL}
+		echo ${ALL_kver}
+	else
+		echo ${ALL_kver}
+	fi
+}
+
+_bootfiles () {
+    mkdir -p ${iso_dir}/boot/isolinux
+    cp -f ${INSTROOT}/${MAP26} ${iso_dir}/boot/
+    cp -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/
+    cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
+    cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
+    cp -rf ${PROFILE}/boot-files/* ${iso_dir}/boot/
+    cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/isolinux/
+    cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
+    cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
+    cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
+}
+
+_mkinitramfs()
+{
+	info "Making bootable image"
+
+	if [ -e "${imgname}" ]; then
+		if [ "${FORCE}" = "y" ]; then
+			info "Removing existing bootable image..."
+			rm -rf "${imgname}"
+		else
+			error "error: Image '${imgname}' already exists, aborting."
+			exit 1
+		fi
+	fi
+	if [ ! -e "${CPIOCONFIG}" ]; then
+		error "error: mkinitcpio config '${CPIOCONFIG}' does not exist, aborting."
+		exit 1
+	fi
+	
+	info "Generating initcpio for image..."
+	if [ "${QUIET}" = "y" ]; then
+		#mkinitcpio -c "${CPIOCONFIG}" -k "${kernelver}" -g "${IMGROOT}/boot/initrd.img" >/dev/null
+		mkinitcpio $1 $2 $3 $4 $5 $6 $7 $8 > /dev/null
+		ret=$?
+    	else
+		#mkinitcpio -c "${CPIOCONFIG}" -k "${kernelver}" -g "${IMGROOT}/boot/initrd.img"
+		mkinitcpio $1 $2 $3 $4 $5 $6 $7 $8
+		ret=$?
+	fi
+	if [ $ret -ne 0 ]; then
+		error "error: initcpio image creation failed..."
+		exit 1
+	fi
+}
+
+# Finally, make the image.
+_imgprepare () {
+	
+	kernelver=$(_kversion)
+
+	basedir=${INSTROOT}
+	[ "${INSTROOT:0:1}" != "/" ] && basedir="$(pwd)/${INSTROOT}"
+	_mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/archiso.img"
+
+}
+
 command_create () {
-    echo "====> Creating working directory: ${work_dir}"
-    mkdir -p "${work_dir}/iso/"
-    mkdir -p "${work_dir}/root-image/"
+    info "====> Creating working directory: ${work_dir}"
+    mkdir -p "${iso_dir}"
+    mkdir -p "${rootimg_dir}"
+    mkdir -p "${isomodules_dir}"
+    mkdir -p "${modules_dir}"
+    mkdir -p "${lastbr_dir}"
+    mkdir -p "${overlay_dir}"
     echo "# archiso isomounts file
 # img - location of image/directory to mount relative to addons directory
 # arch - architecture of this image
@@ -132,54 +229,110 @@ to the iso/ directory.
 
 ...TODO: Write more..." > "${work_dir}/README"
 
-    if [ "${PKGLIST}" != "" ]; then
-        echo "====> Installing packages to '${work_dir}/root-image/'"
-        _pacman "${PKGLIST}"
-
-        echo "Cleaning up what we can"
-        if [ -d "${work_dir}/root-image/boot/" ]; then
-            # remove the initcpio images that were generated for the host system
-            find "${work_dir}/root-image/boot" -name '*.img' -delete
-        fi
-
-        if [ ${CREATE_DEFAULT} == "y" ]; then
-            if [ -d "${work_dir}/root-image/home/" ]; then
-                echo "Creating default home directory"
-                install -d -o1000 -g100 -m0755 "${work_dir}/root-image/home/arch"
-            fi
-        fi
-
-        # delete a lot of unnecessary cache/log files
-        kill_dirs="var/abs var/cache/man var/cache/pacman var/lib/pacman/sync var/log/* var/mail tmp/* initrd"
-        for x in ${kill_dirs}; do
-            if [ -e "${work_dir}/root-image/${x}" ]; then
-                rm -rf "${work_dir}/root-image/${x}"
-            fi
-        done
+    modprobe aufs
+    if [ $? -ne 0 ]; then
+	error "Error loading Union filesystem module. (aufs)"
+        exit 1
     fi
+
+    mount -t aufs -o br:${lastbr_dir}=rw aufs ${rootimg_dir}
+    if [ $? -ne 0 ]; then 
+        error "Error mounting $union."
+        exit 1
+    fi
+
+    # in case of if you have to kill mkarchiso cause of something
+    if [ -d "${INSTROOT}/var/lib/pacman/sync" ]; then
+        rm -R "${INSTROOT}/var/lib/pacman/sync"
+    fi
+
+    info "====> Installing packages to '${rootimg_dir}'"
+    for mod in ${MODULES}; do
+        mkdir -p ${modules_dir}/${mod}
+        info "Adding ${modules_dir}/${mod} as top branch of union."
+        mount -t aufs -o remount,add:0:${modules_dir}/${mod}=rw aufs ${rootimg_dir}
+        info "Adding ${lastbr_dir} as lower branch of union."
+        mount -t aufs -o remount,mod:${lastbr_dir}=rr+wh aufs ${rootimg_dir}
+        lastbr_dir="${modules_dir}/${mod}"
+
+        if [ ! -d "${INSTROOT}/var/lib/pacman/sync/core" ]; then
+	    mkdir -p ${INSTROOT}/var/lib/pacman
+            pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
+            rmdir --ignore-fail-on-non-empty ${INSTROOT}/var/lib/pacman/local
+        fi
+        if [ -e "${PROFILE}/list/${mod}.list" ]; then
+            if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+                #mkarchroot -C "$PACCONFIG" -f -u ${rootimg_dir}
+                pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
+            elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+                cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
+                    #_pacman "${pkgname}"
+                    info "Installing package $pkgname"
+                    mkarchroot -C "$PACONFIG" -f ${rootimg_dir} $pkgname
+                done
+            fi
+        fi
+        if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
+            cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
+                info "Removing package $pkgname"
+                pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
+            done
+        fi
+    done
+    info "Unmounting union"
+    umount -l "${rootimg_dir}"
+
+    info "Cleaning up what we can"
+
+    find "${modules_dir}" -name *.pacnew -name *.pacsave -name *.pacorig -delete
+
+    info "Removing unionfs .wh. files."
+    find ${modules_dir} -type f -name ".wh.*" -exec rm {} \;
+    find ${modules_dir} -type d -name ".wh.*" -exec rm -rf {} \;
+
+    if [ -d "${INSTROOT}/boot/" ]; then
+        # remove the initcpio images that were generated for the host system
+        find "${INSTROOT}/boot" -name '*.img' -delete
+    fi
+
+    if [ ${CREATE_DEFAULT} == "y" ]; then
+        if [ -d "${overlay_dir}/home/" ]; then
+            info "Creating default home directory"
+            install -d -o1000 -g100 -m0755 "${overlay_dir}/home/arch"
+        fi
+    fi
+
+    # delete a lot of unnecessary cache/log files
+    kill_dirs="var/abs var/cache/man var/cache/pacman var/lib/pacman/sync var/log/* var/mail tmp/* initrd"
+    for x in ${kill_dirs}; do
+        if [ -e "${rootimg_dir}/${x}" ]; then
+            rm -rf "${rootimg_dir}/${x}"
+        fi
+    done 
+
 }
 
 # _mksquash dirname
 _mksquash () {
     if [ ! -d "$1" ]; then
-        echo "Error: '$1' is not a directory"
+        error "Error: '$1' is not a directory"
         return 1
     fi
 
-    sqimg="${work_dir}/iso/$(basename ${1}).sqfs"
-    echo "====> Generating SquashFS image for '${1}'"
+    sqimg="${isomodules_dir}/$(basename ${1}).sqfs"
+    info "====> Generating SquashFS image for '${1}'"
     if [ -e "${sqimg}" ]; then
         dirhaschanged=$(find ${1} -newer ${sqimg})
         if [ "${dirhaschanged}" != "" ]; then
-            echo "SquashFS image '${sqimg}' is not up to date, rebuilding..."
+            info "SquashFS image '${sqimg}' is not up to date, rebuilding..."
             rm "${sqimg}"
         else
-            echo "SquashFS image '${sqimg}' is up to date, skipping."
+            info "SquashFS image '${sqimg}' is up to date, skipping."
             return
         fi
     fi
 
-    echo "Creating SquashFS image. This may take some time..."
+    info "Creating SquashFS image. This may take some time..."
     start=$(date +%s)
     if [ "${QUIET}" = "y" ]; then
         mksquashfs "${1}" "${sqimg}" -noappend >/dev/null
@@ -187,54 +340,55 @@ _mksquash () {
         mksquashfs "${1}" "${sqimg}" -noappend
     fi
     minutes=$(echo $start $(date +%s) | awk '{ printf "%0.2f",($2-$1)/60 }')
-    echo "Image creation done in $minutes minutes."
+    info "Image creation done in $minutes minutes."
 }
 
 _imgcommon () {
-    for d in $(find "${work_dir}" -maxdepth 1 -type d -name '[^.]*'); do
-        if [ "$d" != "${work_dir}/iso" -a \
-             "$(basename "$d")" != "iso" -a \
-             "$d" != "${work_dir}" ]; then
+    for d in $(find "${modules_dir}" -maxdepth 1 -type d -name '[^.]*'); do
+        if [ "$d" != "${modules_dir}" -a \
+             "$(basename "$d")" != "modules" ]; then
             _mksquash "$d"
         fi
     done
 
-    echo "====> Making bootable image"
+    info "====> Making bootable image"
 
     # Sanity checks
-    if [ ! -d "${work_dir}/iso" ]; then
-        echo "Error: '${work_dir}/iso' doesn't exist. What did you do?!"
+    if [ ! -d "${iso_dir}" ]; then
+        error "Error: '${iso_dir}' doesn't exist. What did you do?!"
         exit 1
     fi
 
     if [ ! -f "${work_dir}/isomounts" ]; then
-        echo "Error: the isomounts file doesn't exist. This image won't do anything"
-        echo "  Protecting you from yourself and erroring out here..."
+        error "Error: the isomounts file doesn't exist. This image won't do anything"
+        error "  Protecting you from yourself and erroring out here..."
         exit 1
     fi
 
     if [ -e "${imgname}" ]; then
         if [ "${FORCE}" = "y" ]; then
-            echo "Removing existing bootable image..."
+            info "Removing existing bootable image..."
             rm -rf "${imgname}"
         else
-            echo "Error: Image '${imgname}' already exists, aborting."
+            error "Error: Image '${imgname}' already exists, aborting."
             exit 1
         fi
     fi
 
-    cp "${work_dir}/isomounts" "${work_dir}/iso/"
+    cp "${work_dir}/isomounts" "${iso_dir}"
 
-    if ! sed "s|archisolabel=[^ ]*|archisolabel=${LABEL}|" -i ${work_dir}/iso/boot/isolinux/isolinux.cfg; then
-        echo "Error: ${work_dir}/iso/boot/isolinux/isolinux.cfg, doesn't exist, aborting."
+    if ! sed "s|archisolabel=[^ ]*|archisolabel=${LABEL}|" -i ${iso_dir}/boot/isolinux/isolinux.cfg; then
+        error "Error: ${iso_dir}/boot/isolinux/isolinux.cfg, doesn't exist, aborting."
         exit 1
     fi
 }
 
 command_iso () {
+    _bootfiles
     _imgcommon
+    _imgprepare
 
-    echo "Creating ISO image..."
+    info "Creating ISO image..."
     qflag=""
     [ "${QUIET}" = "y" ] && qflag="-quiet"
     mkisofs ${qflag} -r -l \
@@ -246,16 +400,16 @@ command_iso () {
         -publisher "${PUBLISHER}" \
         -A "${APPLICATION}" \
         -V "${LABEL}" \
-        -o "${imgname}" "${work_dir}/iso/"
+        -o "${imgname}" "${iso_dir}"
     isohybrid "${imgname}"
 }
 
 # Go through the main commands in order. If 'all' was specified, then we want
 # to do everything. Start with 'install'.
-if [ "${command_name}" = "create"  ]; then
+if [ "${command_name}" = "create" -o "${command_name}" = "all" ]; then
     command_create
 fi
-if [ "${command_name}" = "iso" ]; then
+if [ "${command_name}" = "iso" -o "${command_name}" = "all" ]; then
     command_iso
 fi
 
