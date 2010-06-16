@@ -8,7 +8,7 @@ install ()
     fi
     MODULES="${MODULES} virtio_pci virtio_blk"
 
-    BINARIES=""
+    BINARIES="find"
     FILES=""
     add_dir /tmpfs
     add_dir /tmpfs.sqfs
