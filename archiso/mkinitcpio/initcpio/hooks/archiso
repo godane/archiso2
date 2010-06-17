@@ -4,7 +4,7 @@ _mnt_aufs() {
     mnt="${2}"
     msg "::: Adding new aufs branch: ${src} to ${mnt}"
     mkdir -p "${mnt}"
-    /bin/mount -t aufs -o remount,append:"${src}"=ro none "${mnt}"
+    /bin/mount -t aufs -o remount,add:1:"${src}"=ro none "${mnt}"
 }
 
 # args: source, mountpoint
@@ -99,10 +99,6 @@ _find_iso() {
         BOOT_MOUNT="/tmpfs/mnt/findiso"
     fi
 
-    #if [ -f "${BOOT_MOUNT}/base.lzm" ]; then
-    #    _mnt_squashfs "${BOOT_MOUNT}/base.lzm" "${newroot}"
-    #fi
-
     if [ -f ${BOOT_MOUNT}/isomounts ]; then
         found=1
     else
@@ -185,10 +181,15 @@ archiso_mount_handler() {
     for m in ${MODULES}; do
         msg ":: Mounting module ${m}"
         _mnt_squashfs ${m} ${newroot}
+        mkdir -p ${newroot}/mnt/live/memory/images/$(basename ${m})
+        _mnt_move /tmpfs/mnt/$(basename ${m} .sqfs) ${newroot}/mnt/live/memory/images/$(basename ${m})
     done
 
-    # Bind our bootmnt dir into the live system
+    # Move our bootmnt dir into the live system
     _mnt_move /bootmnt "${newroot}/bootmnt"
+
+    # Move changes folder
+    _mnt_move /tmpfs ${newroot}/mnt/live/memory/changes
 
     if [ "${copytoram}" != "y" ]; then
         if [ "${FSTYPE}" = "iso9660" ] || [ "${FSTYPE}" = "udf" ]; then
