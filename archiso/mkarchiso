@@ -102,6 +102,7 @@ modules_dir="${work_dir}/modules" # make modules in here
 lastbr_dir="${work_dir}/empty"
 overlay_dir="${work_dir}/modules/overlay"
 INSTROOT="${modules_dir}/$(basename ${ROOT_MOD} .list)"
+sync_dir="${work_dir}/empty"
 
 echo "${APPNAME} : Configuration Settings"
 echo "        working directory:   ${work_dir}"
@@ -255,8 +256,8 @@ to the iso/ directory.
     fi
 
     # in case of if you have to kill mkarchiso cause of something
-    if [ -d "${INSTROOT}/var/lib/pacman/sync" ]; then
-        rm -R "${INSTROOT}/var/lib/pacman/sync"
+    if [ -d "${sync_dir}/var/lib/pacman/sync" ]; then
+        rm -R "${sync_dir}/var/lib/pacman/sync"
     fi
 
     info "====> Installing packages to '${rootimg_dir}'"
@@ -268,10 +269,10 @@ to the iso/ directory.
         mount -t aufs -o remount,mod:${lastbr_dir}=rr+wh aufs ${rootimg_dir}
         lastbr_dir="${modules_dir}/${mod}"
 
-        if [ ! -d "${INSTROOT}/var/lib/pacman/sync/core" ]; then
-	    mkdir -p ${INSTROOT}/var/lib/pacman
-            pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
-            rmdir --ignore-fail-on-non-empty ${INSTROOT}/var/lib/pacman/local
+        if [ ! -d "${sync_dir}/var/lib/pacman/sync/core" ]; then
+	    mkdir -p ${sync_dir}/var/lib/pacman
+            pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
+            rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
         fi
         if [ -e "${PROFILE}/list/${mod}.list" ]; then
             if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
