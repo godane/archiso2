@@ -150,49 +150,62 @@ _bootfiles () {
     cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
 }
 
+_overlay() {
+    if [ -d ${modules_dir}/overlay ]; then
+        rm -Rf ${modules_dir}/overlay
+        cp -rf ${PROFILE}/overlay ${modules_dir}
+    else
+        cp -rf ${PROFILE}/overlay ${modules_dir}
+    fi
+
+    if [ ${CREATE_DEFAULT} == "y" ]; then
+        if [ -d "${modules_dir}/overlay/home/" ]; then
+            info "Creating default home directory"
+            install -d -o1000 -g100 -m0755 "${modules_dir}/overlay/home/arch"
+        fi
+    fi
+}
+
 _mkinitramfs()
 {
-	info "Making bootable image"
+    info "Making bootable image"
 
-	if [ -e "${imgname}" ]; then
-		if [ "${FORCE}" = "y" ]; then
-			info "Removing existing bootable image..."
-			rm -rf "${imgname}"
-		else
-			error "error: Image '${imgname}' already exists, aborting."
-			exit 1
-		fi
-	fi
-	if [ ! -e "${CPIOCONFIG}" ]; then
-		error "error: mkinitcpio config '${CPIOCONFIG}' does not exist, aborting."
-		exit 1
-	fi
-	
-	info "Generating initcpio for image..."
-	if [ "${QUIET}" = "y" ]; then
-		#mkinitcpio -c "${CPIOCONFIG}" -k "${kernelver}" -g "${IMGROOT}/boot/initrd.img" >/dev/null
-		mkinitcpio $1 $2 $3 $4 $5 $6 $7 $8 > /dev/null
-		ret=$?
-    	else
-		#mkinitcpio -c "${CPIOCONFIG}" -k "${kernelver}" -g "${IMGROOT}/boot/initrd.img"
-		mkinitcpio $1 $2 $3 $4 $5 $6 $7 $8
-		ret=$?
-	fi
-	if [ $ret -ne 0 ]; then
-		error "error: initcpio image creation failed..."
-		exit 1
-	fi
+    if [ -e "${imgname}" ]; then
+        if [ "${FORCE}" = "y" ]; then
+            info "Removing existing bootable image..."
+            rm -rf "${imgname}"
+        else
+            error "error: Image '${imgname}' already exists, aborting."
+            exit 1
+        fi
+    fi
+    if [ ! -e "${CPIOCONFIG}" ]; then
+        error "error: mkinitcpio config '${CPIOCONFIG}' does not exist, aborting."
+        exit 1
+    fi
+
+    info "Generating initcpio for image..."
+    if [ "${QUIET}" = "y" ]; then
+        #mkinitcpio -c "${CPIOCONFIG}" -k "${kernelver}" -g "${IMGROOT}/boot/initrd.img" >/dev/null
+        mkinitcpio $1 $2 $3 $4 $5 $6 $7 $8 > /dev/null
+        ret=$?
+    else
+        #mkinitcpio -c "${CPIOCONFIG}" -k "${kernelver}" -g "${IMGROOT}/boot/initrd.img"
+        mkinitcpio $1 $2 $3 $4 $5 $6 $7 $8
+        ret=$?
+    fi
+    if [ $ret -ne 0 ]; then
+        error "error: initcpio image creation failed..."
+        exit 1
+    fi
 }
 
 # Finally, make the image.
 _imgprepare () {
-	
-	kernelver=$(_kversion)
-
-	basedir=${INSTROOT}
-	[ "${INSTROOT:0:1}" != "/" ] && basedir="$(pwd)/${INSTROOT}"
-	_mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/archiso.img"
-
+    kernelver=$(_kversion)
+    basedir=${INSTROOT}
+    [ "${INSTROOT:0:1}" != "/" ] && basedir="$(pwd)/${INSTROOT}"
+    _mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/archiso.img"
 }
 
 command_create () {
@@ -295,13 +308,6 @@ to the iso/ directory.
         find "${INSTROOT}/boot" -name '*.img' -delete
     fi
 
-    if [ ${CREATE_DEFAULT} == "y" ]; then
-        if [ -d "${overlay_dir}/home/" ]; then
-            info "Creating default home directory"
-            install -d -o1000 -g100 -m0755 "${overlay_dir}/home/arch"
-        fi
-    fi
-
     # delete a lot of unnecessary cache/log files
     kill_dirs="var/abs var/cache/man var/cache/pacman var/lib/pacman/sync var/log/* var/mail tmp/* initrd"
     for x in ${kill_dirs}; do
@@ -344,12 +350,15 @@ _mksquash () {
 }
 
 _imgcommon () {
-    for d in $(find "${modules_dir}" -maxdepth 1 -type d -name '[^.]*'); do
-        if [ "$d" != "${modules_dir}" -a \
-             "$(basename "$d")" != "modules" ]; then
-            _mksquash "$d"
+    for m in ${MODULES}; do
+        if [ -d "${modules_dir}/$m" ]; then
+            _mksquash "${modules_dir}/$m"
         fi
     done
+
+    if [ -d "${modules_dir}/overlay" ]; then
+        _mksquash "${modules_dir}/overlay"
+    fi
 
     info "====> Making bootable image"
 
@@ -385,6 +394,7 @@ _imgcommon () {
 
 command_iso () {
     _bootfiles
+    _overlay
     _imgcommon
     _imgprepare
 
