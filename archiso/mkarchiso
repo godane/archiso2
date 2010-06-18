@@ -14,6 +14,7 @@ VMLINUZ="boot/vmlinuz26"
 MAP26="boot/System.map26"
 KERNEL="/etc/mkinitcpio.d/kernel26.kver"
 CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
+CDNAME="archiso-live"
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -97,12 +98,14 @@ esac
 
 rootimg_dir="${work_dir}/root-image" # union folder
 iso_dir="${work_dir}/iso" # iso folder
-isomodules_dir="${work_dir}/iso/modules" # place to put squashfs images of modules for union
+isobasemod_dir="${work_dir}/iso/${CDNAME}/base" # place to put squashfs images of modules for union
+isomodules_dir="${work_dir}/iso/${CDNAME}/modules"
 modules_dir="${work_dir}/modules" # make modules in here
 lastbr_dir="${work_dir}/empty"
 overlay_dir="${work_dir}/modules/overlay"
 INSTROOT="${modules_dir}/$(basename ${ROOT_MOD} .list)"
 sync_dir="${work_dir}/empty"
+sgn_file="${iso_dir}/${CDNAME}/livecd.sgn"
 
 echo "${APPNAME} : Configuration Settings"
 echo "        working directory:   ${work_dir}"
@@ -213,10 +216,12 @@ command_create () {
     info "====> Creating working directory: ${work_dir}"
     mkdir -p "${iso_dir}"
     mkdir -p "${rootimg_dir}"
-    mkdir -p "${isomodules_dir}"
+    #mkdir -p "${isomodules_dir}"
+    mkdir -p ${iso_dir}/${CDNAME}/{base,modules,optional,rootcopy}
     mkdir -p "${modules_dir}"
     mkdir -p "${lastbr_dir}"
     mkdir -p "${overlay_dir}"
+    touch ${sgn_file}
     echo "# archiso isomounts file
 # img - location of image/directory to mount relative to addons directory
 # arch - architecture of this image
@@ -262,7 +267,9 @@ to the iso/ directory.
 
     info "====> Installing packages to '${rootimg_dir}'"
     for mod in ${MODULES}; do
-        mkdir -p ${modules_dir}/${mod}
+        if [ ! -d ${modules_dir}/${mod} ]; then
+            mkdir -p ${modules_dir}/${mod}
+        fi
         info "Adding ${modules_dir}/${mod} as top branch of union."
         mount -t aufs -o remount,add:0:${modules_dir}/${mod}=rw aufs ${rootimg_dir}
         info "Adding ${lastbr_dir} as lower branch of union."
@@ -326,10 +333,11 @@ _mksquash () {
         return 1
     fi
 
-    sqimg="${isomodules_dir}/$(basename ${1}).sqfs"
+    db_dir=${2}
+    sqimg="${isobasemod_dir}/$(basename ${1}).sqfs"
     info "====> Generating SquashFS image for '${1}'"
     if [ -e "${sqimg}" ]; then
-        dirhaschanged=$(find ${1} -newer ${sqimg})
+        dirhaschanged=$(find ${1}${db_dir} -newer ${sqimg})
         if [ "${dirhaschanged}" != "" ]; then
             info "SquashFS image '${sqimg}' is not up to date, rebuilding..."
             rm "${sqimg}"
@@ -353,7 +361,7 @@ _mksquash () {
 _imgcommon () {
     for m in ${MODULES}; do
         if [ -d "${modules_dir}/$m" ]; then
-            _mksquash "${modules_dir}/$m"
+            _mksquash "${modules_dir}/$m" /var/lib/pacman/local
         fi
     done
 

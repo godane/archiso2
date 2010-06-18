@@ -8,19 +8,26 @@ install ()
     fi
     MODULES="${MODULES} virtio_pci virtio_blk"
 
-    BINARIES="find"
+    BINARIES=""
     FILES=""
     add_dir /tmpfs
     add_dir /tmpfs.sqfs
     add_dir /bootmnt
     add_dir /tmpfs/mnt/live/memory/changes
     add_dir /tmpfs/mnt/live/memory/images
+    add_dir /tmp
+    add_dir /var/log
+    add_dir /mnt
 
     add_device /dev/loop0 b 7 0
 
     add_binary /lib/udev/cdrom_id
 
     add_file /lib/udev/rules.d/60-cdrom_id.rules
+
+    add_file $CWD/initcpio/liblinuxlive "/liblinuxlive"
+    add_file $CWD/initcpio/bash "/bin/bash"
+    add_file $CWD/initcpio/linuxrc "/linuxrc"
 
     SCRIPT="archiso"
 }

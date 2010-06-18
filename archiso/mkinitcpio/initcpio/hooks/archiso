@@ -25,6 +25,15 @@ _mnt_move() {
     /bin/mount -o move "${src}" "${mnt}"
 }
 
+_mnt_iso() {
+    img="${1}"
+    #mnt="${2}"
+    mnt="/mnt/findiso"
+    msg "::: Mounting ${img} to ${mnt}"
+    mkdir -p "${mnt}"
+    mount -r -t iso9660 "${img}" "${mnt}"
+}
+
 # args: /path/to/image_file, mountpoint
 _mnt_squashfs() {
     img="${1}"
@@ -55,8 +64,8 @@ _find_device() {
     for device in /dev/hd[a-z] /dev/sr[0-9]* /dev/scd[a-z] /dev/sd[a-z][0-9] /dev/sg[0-9]*; do
         [ ! -e "${device}" ] && continue
         FSTYPE=$(blkid -o value -s TYPE ${device})
-        #bootmnt="/tmpfs/mnt/${device##*/}"
-        bootmnt="/bootmnt"
+        bootmnt="/mnt/${device##*/}"
+        #bootmnt="/bootmnt"
         mkdir -p "${bootmnt}"
         if mount -t ${FSTYPE} "${device}" "${bootmnt}" >/dev/null 2>&1; then
             if [ -f "${bootmnt}/${findiso}" ]; then
@@ -92,11 +101,11 @@ _find_device() {
 }
 
 _find_iso() {
-    newroot=${1}
+    #newroot=${1}
     if [ -f "${BOOT_MOUNT}/${findiso}" ]; then
         _mnt_iso "${BOOT_MOUNT}/${findiso}"
         BOOT_ORIG="${BOOT_MOUNT}"
-        BOOT_MOUNT="/tmpfs/mnt/findiso"
+        BOOT_MOUNT="/mnt/findiso"
     fi
 
     if [ -f ${BOOT_MOUNT}/isomounts ]; then
@@ -133,8 +142,21 @@ run_hook () {
         archisodevice="/dev/disk/by-label/${archisolabel}"
     fi
 
+    #msg -n ":: Mounting tmpfs, size=${tmpfs_size}..."
+    mount -t tmpfs -o "size=5%" tmpfs /mnt
+    #msg "done."
+
+    modprobe -q loop max_loop=255 >/dev/null 2>&1
+    modprobe -q isofs >/dev/null 2>&1
+    modprobe -q ext4 >/dev/null 2>&1
+    _find_device
+
+    if [ "x${findiso}" != "x" ]; then
+        _find_iso
+    fi
     # set mount handler for archiso
-    mount_handler="archiso_mount_handler"
+    #mount_handler="archiso_mount_handler"
+    exec /linuxrc
 }
 
 archiso_mount_handler() {
