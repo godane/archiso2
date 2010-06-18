@@ -75,14 +75,14 @@ _find_device() {
                 break
             elif [ "x${from}" != "x" ]; then
                 from=${from##*/}
-                if [ -f "${bootmnt}/${from}/isomounts" ]; then
+                if [ -f "${bootmnt}/${from}/${cdname}/${sgnfile}" ]; then
                     found=1
                     msg "${device}"; echo
                     BOOT_MOUNT="${bootmnt}"
                     break
                 fi
             else
-                if [ -f "${bootmnt}/isomounts" ]; then
+                if [ -f "${bootmnt}/${cdname}/${sgnfile}" ]; then
                     found=1
                     msg "${device}"; echo
                     BOOT_MOUNT="${bootmnt}"
@@ -108,7 +108,7 @@ _find_iso() {
         BOOT_MOUNT="/mnt/findiso"
     fi
 
-    if [ -f ${BOOT_MOUNT}/isomounts ]; then
+    if [ -f ${BOOT_MOUNT}/${cdname}/${sgnfile} ]; then
         found=1
     else
         found=0
@@ -120,6 +120,9 @@ _find_iso() {
 }
 
 run_hook () {
+
+    . /liblinuxlive
+
     if [ "x${arch}" = "x" ]; then
         arch="$(uname -m)"
     fi
@@ -132,23 +135,24 @@ run_hook () {
         tmpfs_sqfs_size="75%"
     fi
 
-    if [ "x${isomounts}" != "x" ]; then
-        isomounts="/bootmnt/${isomounts}"
-    else
-        isomounts="/bootmnt/isomounts"
-    fi
-
-    if [ "x${archisodevice}" = "x" ]; then
-        archisodevice="/dev/disk/by-label/${archisolabel}"
-    fi
-
     #msg -n ":: Mounting tmpfs, size=${tmpfs_size}..."
     mount -t tmpfs -o "size=5%" tmpfs /mnt
     #msg "done."
 
+    if [ "x${cdname}" != "x" ]; then
+        cdname="$(cmdline_value cdname)"
+    else
+        cdname="${LIVECDNAME}"
+    fi
+
+    if [ "x${sgnfile}" = "x" ]; then
+        sgnfile="livecd.sgn"
+    fi
+
     modprobe -q loop max_loop=255 >/dev/null 2>&1
     modprobe -q isofs >/dev/null 2>&1
     modprobe -q ext4 >/dev/null 2>&1
+    modprobe -q btrfs >/dev/null 2>&1
     _find_device
 
     if [ "x${findiso}" != "x" ]; then

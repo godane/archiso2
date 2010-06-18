@@ -15,6 +15,7 @@ MAP26="boot/System.map26"
 KERNEL="/etc/mkinitcpio.d/kernel26.kver"
 CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
 CDNAME="archiso-live"
+RMSTUFF=n
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -102,7 +103,6 @@ isobasemod_dir="${work_dir}/iso/${CDNAME}/base" # place to put squashfs images o
 isomodules_dir="${work_dir}/iso/${CDNAME}/modules"
 modules_dir="${work_dir}/modules" # make modules in here
 lastbr_dir="${work_dir}/empty"
-overlay_dir="${work_dir}/modules/overlay"
 INSTROOT="${modules_dir}/$(basename ${ROOT_MOD} .list)"
 sync_dir="${work_dir}/empty"
 sgn_file="${iso_dir}/${CDNAME}/livecd.sgn"
@@ -133,12 +133,12 @@ _pacman ()
 
 _kversion ()
 {
-	if [ -f ${INSTROOT}${KERNEL} ]; then
-		source ${INSTROOT}${KERNEL}
-		echo ${ALL_kver}
-	else
-		echo ${ALL_kver}
-	fi
+    if [ -f ${INSTROOT}${KERNEL} ]; then
+        source ${INSTROOT}${KERNEL}
+        echo ${ALL_kver}
+    else
+        echo ${ALL_kver}
+    fi
 }
 
 _bootfiles () {
@@ -155,6 +155,7 @@ _bootfiles () {
 }
 
 _overlay() {
+
     if [ -d ${modules_dir}/overlay ]; then
         rm -Rf ${modules_dir}/overlay
         cp -rf ${PROFILE}/overlay ${modules_dir}
@@ -168,6 +169,13 @@ _overlay() {
             install -d -o1000 -g100 -m0755 "${modules_dir}/overlay/home/arch"
         fi
     fi
+
+    if [ "${QUIET}" = "y" ]; then
+        mksquashfs "${modules_dir}/overlay" "${iso_dir}/${CDNAME}/optional/overlay.sqfs" -noappend >/dev/null
+    else
+        mksquashfs "${modules_dir}/overlay" "${iso_dir}/${CDNAME}/optional/overlay.sqfs" -noappend
+    fi
+
 }
 
 _mkinitramfs()
@@ -212,35 +220,53 @@ _imgprepare () {
     _mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/archiso.img"
 }
 
+_rmstuff () {
+    if [ "${RMSTUFF}" = "y" ]; then
+        for MODULE in ${MODULES}; do
+            if [ -f "${PROFILE}/list/rmlocale" ]; then
+                cat "${PROFILE}/list/rmlocale" | grep -v "^#" | while read rmlocale; do
+                    if [ -d "${modules_dir}/${MODULE}/usr/share/locale/${rmlocale}" ]; then
+                        info "Removing locale $rmlocale from ${MODULE}"
+                        rm -Rf ${modules_dir}/${MODULE}/usr/share/locale/${rmlocale}
+                    fi
+                done
+            fi
+
+            if [ -f "${PROFILE}/list/remove" ]; then
+                cat "${PROFILE}/list/remove" | grep -v "^#" | while read remove; do
+                    if [ -e "${modules_dir}/${MODULE}/${remove}" ]; then
+                        info "Removing $remove from ${MODULE}"
+                        rm -Rf ${modules_dir}/${MODULE}/${remove}
+                    fi
+                done
+            fi
+            info "Removing .pyc files from ${MODULE}"
+            RMPYC=$(find ${modules_dir}/${MODULE}/ -name "*.pyc")
+            rm -Rf ${RMPYC}
+            info "Uncompressing .gz files in ${MODULE}"
+            find ${modules_dir}/${MODULE}/ -name "*.gz" -type f -exec gunzip -qf {} \;
+            if [ -f ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir ]; then
+                sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir
+            fi
+        done
+    fi
+}
+
 command_create () {
     info "====> Creating working directory: ${work_dir}"
     mkdir -p "${iso_dir}"
     mkdir -p "${rootimg_dir}"
     #mkdir -p "${isomodules_dir}"
-    mkdir -p ${iso_dir}/${CDNAME}/{base,modules,optional,rootcopy}
+    mkdir -p ${iso_dir}/${CDNAME}/{base,modules,optional,rootcopy,tmp}
     mkdir -p "${modules_dir}"
     mkdir -p "${lastbr_dir}"
-    mkdir -p "${overlay_dir}"
     touch ${sgn_file}
-    echo "# archiso isomounts file
-# img - location of image/directory to mount relative to addons directory
-# arch - architecture of this image
-# mount point - absolute location on the post-initrd root
-# type - either 'bind' or 'squashfs' for now
-
-# syntax: <img> <arch> <mount point> <type>
-
-# NOTE: Order matters. If the same file exists in multiple
-#  images, the FIRST one mounted, top-down, will take precedence
-
-root-image.sqfs i686 / squashfs
-#root-image-x86_64.sqfs x86_64 / squashfs" > "${work_dir}/isomounts"
 
     echo "README for this archiso created directory
 
 All directories in this dir, except for 'iso' will be squashed
-with squashfs and put into the iso dir as iso/<dirname>.sqfs
-This should be reflected in the isomounts file
+with squashfs and put into the iso dir as iso/${CDNAME}/base/<dirname>.sqfs
+The squashfs images will be auto detected on boot.
 
 The iso dir is later used to build the actual bootable iso.
 Please ensure the proper bootloader is installed or copied
@@ -289,7 +315,7 @@ to the iso/ directory.
                 cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
                     #_pacman "${pkgname}"
                     info "Installing package $pkgname"
-                    mkarchroot -C "$PACONFIG" -f ${rootimg_dir} $pkgname
+                    mkarchroot -C "$PACONFIG" -f ${rootimg_dir} "$pkgname"
                 done
             fi
         fi
@@ -302,6 +328,9 @@ to the iso/ directory.
     done
     info "Unmounting union"
     umount -l "${rootimg_dir}"
+
+    info "Removing stuff"
+    _rmstuff
 
     info "Cleaning up what we can"
 
@@ -333,11 +362,11 @@ _mksquash () {
         return 1
     fi
 
-    db_dir=${2}
+    time_dir=${2}
     sqimg="${isobasemod_dir}/$(basename ${1}).sqfs"
     info "====> Generating SquashFS image for '${1}'"
     if [ -e "${sqimg}" ]; then
-        dirhaschanged=$(find ${1}${db_dir} -newer ${sqimg})
+        dirhaschanged=$(find ${1}${time_dir} -newer ${sqimg})
         if [ "${dirhaschanged}" != "" ]; then
             info "SquashFS image '${sqimg}' is not up to date, rebuilding..."
             rm "${sqimg}"
@@ -365,10 +394,6 @@ _imgcommon () {
         fi
     done
 
-    if [ -d "${modules_dir}/overlay" ]; then
-        _mksquash "${modules_dir}/overlay"
-    fi
-
     info "====> Making bootable image"
 
     # Sanity checks
@@ -377,8 +402,8 @@ _imgcommon () {
         exit 1
     fi
 
-    if [ ! -f "${work_dir}/isomounts" ]; then
-        error "Error: the isomounts file doesn't exist. This image won't do anything"
+    if [ ! -f "${sgn_file}" ]; then
+        error "Error: the ${sgn_file} file doesn't exist. This image won't do anything"
         error "  Protecting you from yourself and erroring out here..."
         exit 1
     fi
@@ -392,18 +417,13 @@ _imgcommon () {
             exit 1
         fi
     fi
-
-    cp "${work_dir}/isomounts" "${iso_dir}"
-
-    if ! sed "s|archisolabel=[^ ]*|archisolabel=${LABEL}|" -i ${iso_dir}/boot/isolinux/isolinux.cfg; then
-        error "Error: ${iso_dir}/boot/isolinux/isolinux.cfg, doesn't exist, aborting."
-        exit 1
-    fi
 }
 
 command_iso () {
     _bootfiles
-    _overlay
+    if [ -d ${PROFILE}/overlay ]; then
+        _overlay
+    fi
     _imgcommon
     _imgprepare
 
