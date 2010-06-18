@@ -156,8 +156,10 @@ if [ "$RUN" != "" ]; then
 		fi
 	fi
 
-	if [ -d "${working_dir}/lib/modules" ]; then
-		ldconfig -r "${working_dir}"
+	if [ -d "${working_dir}/var/lib/pacman/local" ]; then
+		if [ -f "${working_dir}/etc/ld.so.conf" ]; then
+			ldconfig -r "${working_dir}"
+		fi
 	fi
 
 	if [ "$pac_conf" != "" -a "$NOCOPY" = "n" ]; then
@@ -170,7 +172,7 @@ if [ "$RUN" != "" ]; then
 
 	if [ -e "${working_dir}/etc/locale.gen" ]; then
 		cp /etc/locale.gen "${working_dir}/etc/locale.gen"
-		chroot "${working_dir}" locale-gen
+	#	chroot "${working_dir}" locale-gen
 	fi
 
 	if [ ! -e "${working_dir}/.arch-chroot" ]; then
