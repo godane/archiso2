@@ -3,7 +3,6 @@
 PKGLIST=""
 QUIET="y"
 FORCE="n"
-PACCONFIG="/etc/pacman.conf"
 export LABEL="ARCH_$(date +%Y%m)"
 PUBLISHER="Arch Linux <http://www.archlinux.org>"
 APPLICATION="Arch Linux Live/Rescue CD"
@@ -20,10 +19,6 @@ RMSTUFF=n
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
 info () { echo -e "\033[1;32;40m>>> \033[1;37;40m$@\033[1;0m"; }
-
-if [ -f ${PROFILE}/config ]; then
-	source ${PROFILE}/config
-fi
 
 APPNAME=$(basename "${0}")
 
@@ -48,6 +43,8 @@ usage ()
     echo "      includes all specified packages"
     echo "   iso <dir> <image name>"
     echo "      build an iso image from the working dir"
+    echo "   all <dir> <image name>"
+    echo "      create base folder and iso in one command"
     exit $1
 }
 
@@ -78,9 +75,19 @@ if [ "$EUID" != "0" ]; then
     exit 1
 fi
 
-if [ ! -f "$PACCONFIG" ]; then
-    error "error: pacman config file '$PACCONFIG' does not exist"
-    exit 1
+if [ -f ${PROFILE}/config ]; then
+	source ${PROFILE}/config
+fi
+
+if [ -f "${PROFILE}/pacman.conf" ]; then
+    PACCONFIG="${PROFILE}/pacman.conf"
+else
+    if [ -f "/etc/pacman.conf" ]; then
+        PACCONFIG="/etc/pacman.conf"
+    elif [ ! -f "$PACCONFIG" ]; then
+        error "error: pacman config file '$PACCONFIG' does not exist"
+        exit 1
+    fi
 fi
 
 command_name="${1}"
@@ -110,6 +117,7 @@ sgn_file="${iso_dir}/${CDNAME}/livecd.sgn"
 echo "${APPNAME} : Configuration Settings"
 echo "        working directory:   ${work_dir}"
 echo "               image name:   ${imgname}"
+echo "            pacman config:   ${PACCONFIG}"
 
 # usage: _pacman <packages>...
 _pacman ()
@@ -244,7 +252,10 @@ _rmstuff () {
             RMPYC=$(find ${modules_dir}/${MODULE}/ -name "*.pyc")
             rm -Rf ${RMPYC}
             info "Uncompressing .gz files in ${MODULE}"
-            find ${modules_dir}/${MODULE}/ -name "*.gz" -type f -exec gunzip -qf {} \;
+            FINDGZ=$(find ${modules_dir}/${MODULE}/ -name "*.gz" -type f)
+            if [ -f "${FINDGZ}" ]; then
+                gunzip -q ${FINDGZ}
+            fi
             if [ -f ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir ]; then
                 sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir
             fi
@@ -307,24 +318,27 @@ to the iso/ directory.
             pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
             rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
         fi
-        if [ -e "${PROFILE}/list/${mod}.list" ]; then
-            if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
-                #mkarchroot -C "$PACCONFIG" -f -u ${rootimg_dir}
-                pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
-            elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+        
+        if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+            #mkarchroot -C "$PACCONFIG" -f -u ${rootimg_dir}
+            pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
+        elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+            if [ -e "${PROFILE}/list/${mod}.list" ]; then
                 cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
                     #_pacman "${pkgname}"
                     info "Installing package $pkgname"
                     mkarchroot -C "$PACONFIG" -f ${rootimg_dir} "$pkgname"
                 done
             fi
+
+            if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
+                cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
+                    info "Removing package $pkgname"
+                    pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
+                done
+            fi
         fi
-        if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
-            cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
-                info "Removing package $pkgname"
-                pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
-            done
-        fi
+
     done
     info "Unmounting union"
     umount -l "${rootimg_dir}"
