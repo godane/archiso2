@@ -263,6 +263,9 @@ mkdir -p $UNION/$INITRAMDISK/$MEMORY
 mkdir -p $UNION/$INITRAMDISK/$MOUNTDIR
 mount -n -o move $MEMORY $UNION/$INITRAMDISK/$MEMORY
 mount -n -o move $MOUNTDIR $UNION/$INITRAMDISK/$MOUNTDIR
+cp -a /liblinuxlive $UNION/$INITRAMDISK
+cp -a /linuxrc $UNION/$INITRAMDISK
+cp -a /hooks $UNION/$INITRAMDISK
 
 debug_shell
 
