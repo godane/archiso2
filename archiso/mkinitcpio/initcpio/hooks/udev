@@ -4,7 +4,7 @@ run_hook ()
     msg ":: update modules.dep..."
     depmod -a
     msg ":: Triggering uevents..."
-    /sbin/udevadm trigger
+    /sbin/udevadm trigger --action=add
     /sbin/udevadm settle
     msg "done."
 }

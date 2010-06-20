@@ -241,7 +241,7 @@ fstab_update $UNION
 # and do some cleanup, unmount few things which are no longer needed.
 #rmmod_unused_modules
 #fumount /usr
-fumount /sys
+#fumount /sys
 
 # More likely these directories aren't there.
 # Even if they are, this won't hurt.
@@ -258,6 +258,20 @@ chmod 1777 $UNION/tmp
 
 debug_shell
 
+echolog "Killing udevd"
+#Special handling if udev is running
+udevpid=$(/bin/pidof udevd)
+if [ -n "${udevpid}" ]; then
+    # Settle pending uevents, then kill udev
+    /sbin/udevadm settle
+    /bin/kill ${udevpid} > /dev/null 2>&1
+    while /bin/pidof udevd >/dev/null; do
+        sleep 0.1
+    done
+fi
+
+debug_shell
+
 echolog "move memory folder to union"
 mkdir -p $UNION/$INITRAMDISK/$MEMORY
 mkdir -p $UNION/$INITRAMDISK/$MOUNTDIR
@@ -266,6 +280,11 @@ mount -n -o move $MOUNTDIR $UNION/$INITRAMDISK/$MOUNTDIR
 cp -a /liblinuxlive $UNION/$INITRAMDISK
 cp -a /linuxrc $UNION/$INITRAMDISK
 cp -a /hooks $UNION/$INITRAMDISK
+mount -n -o move /proc $UNION/proc
+mount -n -o move /sys $UNION/sys
+if [ -f /var/log/livedbg ]; then
+    cp -a /var/log/livedbg $UNION/$INITRAMDISK
+fi
 
 debug_shell
 
@@ -296,20 +315,6 @@ if [ "$INIT" = "" ]; then fatal "Can't find executable init command"; fi
 
 # time to end Linux Live scripts and start the distribution itself,
 # using /sbin/init or whatever was found.
-
-debug_shell
-
-echolog "Killing udevd"
-#Special handling if udev is running
-udevpid=$(/bin/pidof udevd)
-if [ -n "${udevpid}" ]; then
-    # Settle pending uevents, then kill udev
-    /sbin/udevadm settle
-    /bin/kill ${udevpid} > /dev/null 2>&1
-    while /bin/pidof udevd >/dev/null; do
-        sleep 0.1
-    done
-fi
 
 debug_shell
 
