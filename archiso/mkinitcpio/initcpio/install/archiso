@@ -8,13 +8,14 @@ install ()
     fi
     MODULES="${MODULES} virtio_pci virtio_blk"
 
-    BINARIES=""
+    BINARIES="fusermount ulockmgr_server mount.fuse ntfs-3g mount.ntfs-3g ntfs-3g.probe ntfsmount"
+    #BINARIES="find"
     FILES=""
-    add_dir /tmpfs
-    add_dir /tmpfs.sqfs
-    add_dir /bootmnt
-    add_dir /tmpfs/mnt/live/memory/changes
-    add_dir /tmpfs/mnt/live/memory/images
+    #add_dir /tmpfs
+    #add_dir /tmpfs.sqfs
+    #add_dir /bootmnt
+    #add_dir /tmpfs/mnt/live/memory/changes
+    #add_dir /tmpfs/mnt/live/memory/images
     add_dir /tmp
     add_dir /var/log
     add_dir /mnt
@@ -22,6 +23,20 @@ install ()
     add_device /dev/loop0 b 7 0
 
     add_binary /lib/udev/cdrom_id
+    #add_binary /sbin/blockdev
+
+    # fuse
+    #add_binary /bin/fusermount
+    #add_binary /bin/ulockmgr_server
+    #add_binary /sbin/mount.fuse
+
+    # ntfs-3g
+    #add_binary /bin/ntfs-3g
+    #add_binary /sbin/mount.ntfs-3g
+    #add_binary /usr/bin/ntfs-3g.probe
+
+    # ntfsprogs
+    #add_binary /usr/bin/ntfsmount
 
     add_file /lib/udev/rules.d/60-cdrom_id.rules
 

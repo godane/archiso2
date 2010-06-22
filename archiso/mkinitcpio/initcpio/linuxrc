@@ -9,7 +9,7 @@ export PATH=.:/:/usr/sbin:/usr/bin:/sbin:/bin
 #mount -n -o remount,rw /         # for the case we forgot rw boot option
 ln -sf /proc/mounts /etc/mtab    # this allows us to use umount -a
 
-. liblinuxlive # it requires proc to be mounted
+. /liblinuxlive # it requires proc to be mounted
 
 # Don't print kernel messages to konsole now.
 # Syslog will reset printk settings, no need to remember it here anymore.
@@ -24,7 +24,7 @@ modprobe_essential_modules
 #mount_initrd_loops
 
 # start hotplugging before hw drivers load
-mdev_start_hotplug
+#mdev_start_hotplug
 
 # Then load drivers for data storage and input devices
 modprobe_usb_modules
@@ -150,6 +150,7 @@ echolog "Setup union directory (using aufs)"
 
 mkdir -p $CHANGES
 mkdir -p $IMAGES
+mount -n -t tmpfs tmpfs $IMAGES
 
 debug_shell
 
@@ -258,36 +259,6 @@ chmod 1777 $UNION/tmp
 
 debug_shell
 
-echolog "Killing udevd"
-#Special handling if udev is running
-udevpid=$(/bin/pidof udevd)
-if [ -n "${udevpid}" ]; then
-    # Settle pending uevents, then kill udev
-    /sbin/udevadm settle
-    /bin/kill ${udevpid} > /dev/null 2>&1
-    while /bin/pidof udevd >/dev/null; do
-        sleep 0.1
-    done
-fi
-
-debug_shell
-
-echolog "move memory folder to union"
-mkdir -p $UNION/$INITRAMDISK/$MEMORY
-mkdir -p $UNION/$INITRAMDISK/$MOUNTDIR
-mount -n -o move $MEMORY $UNION/$INITRAMDISK/$MEMORY
-mount -n -o move $MOUNTDIR $UNION/$INITRAMDISK/$MOUNTDIR
-cp -a /liblinuxlive $UNION/$INITRAMDISK
-cp -a /linuxrc $UNION/$INITRAMDISK
-cp -a /hooks $UNION/$INITRAMDISK
-mount -n -o move /proc $UNION/proc
-mount -n -o move /sys $UNION/sys
-if [ -f /var/log/livedbg ]; then
-    cp -a /var/log/livedbg $UNION/$INITRAMDISK
-fi
-
-debug_shell
-
 # Union contains all the files and directories unioned from all modules.
 # Change root directory to it, and move initrd's root to /mnt/live/initramdisk
 # Finaly execute /sbin/init to start the distribution.
@@ -300,7 +271,10 @@ mkdir -p $INITRAMDISK
 # so at least disk devices exist (your Linux may need them).
 # Two exceptions, do not copy pty* and tty* devs.
 if [ ! -e /dev/console ]; then mknod /dev/console c 5 1; fi
-cp -fdR /dev . 2>/dev/null
+#cp -fdR /dev . 2>/dev/null
+mount -n -o move /proc proc
+mount -n -o move /sys sys
+mount -n -o move /dev dev
 
 # find chroot and init
 if [ -x bin/chroot ]; then  CHROOT=bin/chroot; fi
@@ -324,12 +298,12 @@ mount -n -o remount,ro aufs .
 # This allows us to use the cleanup script during reboot, as init will be
 # started from memory and not from the union and /union will not be busy.
 
-cp -af $INIT $INITRAMDISK/$MEMORY
+cp -af $INIT /bin >/dev/null 2>&1
 if [ $? -eq 0 ]; then
-   #pivot_root . $INITRAMDISK
-   exec $CHROOT . $INITRAMDISK/$MEMORY/init <dev/console >dev/console 2>&1
+   pivot_root . $INITRAMDISK
+   exec $CHROOT . $INITRAMDISK/bin/init <dev/console >dev/console 2>&1
 else # If copying fails, start init directly.
-   #pivot_root . $INITRAMDISK
+   pivot_root . $INITRAMDISK
    exec $CHROOT . $INIT <dev/console >dev/console 2>&1
 fi
 

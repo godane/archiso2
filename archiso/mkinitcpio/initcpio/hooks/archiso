@@ -93,7 +93,7 @@ _find_device() {
             msg "uhm"; echo
             err "Failed to mount ${device} (FS is ${FSTYPE})"
         fi
-        [ ${found} -eq 0 ] && umount "${bootmnt}" >/dev/null 2>&1
+        [ ${found} -eq 0 ] && umount -l "${bootmnt}" >/dev/null 2>&1
     done
     export found
     export archisodevice="${device}"
@@ -108,15 +108,29 @@ _find_iso() {
         BOOT_MOUNT="/mnt/findiso"
     fi
 
-    if [ -f ${BOOT_MOUNT}/${cdname}/${sgnfile} ]; then
+    if [ -f "${BOOT_MOUNT}/${cdname}/${sgnfile}" ]; then
         found=1
     else
         found=0
     fi
 
-    export found
     export BOOT_MOUNT
     export BOOT_ORIG
+}
+
+copy_fs () {
+    FOLDERS="bin etc hooks lib sbin usr"
+    for i in ${FOLDERS}; do
+        cp -a ${FOLDERS} /new_root
+    done
+
+    cp -a /linuxrc /new_root/sbin/init
+    cp -a /liblinuxlive /new_root/liblinuxlive
+    mkdir -p /new_root/proc
+    mkdir -p /new_root/var/log
+    mkdir -p /new_root/sys
+    mkdir -p /new_root/tmp
+    mkdir -p /new_root/dev
 }
 
 run_hook () {
@@ -135,10 +149,6 @@ run_hook () {
         tmpfs_sqfs_size="75%"
     fi
 
-    #msg -n ":: Mounting tmpfs, size=${tmpfs_size}..."
-    mount -t tmpfs -o "size=5%" tmpfs /mnt
-    #msg "done."
-
     if [ "x${cdname}" != "x" ]; then
         cdname="$(cmdline_value cdname)"
     else
@@ -149,45 +159,28 @@ run_hook () {
         sgnfile="livecd.sgn"
     fi
 
-    modprobe -q loop max_loop=255 >/dev/null 2>&1
-    modprobe -q isofs >/dev/null 2>&1
-    modprobe -q ext4 >/dev/null 2>&1
-    modprobe -q btrfs >/dev/null 2>&1
-    _find_device
-
-    if [ "x${findiso}" != "x" ]; then
-        _find_iso
-    fi
     # set mount handler for archiso
-    #mount_handler="archiso_mount_handler"
-    exec /linuxrc
+    mount_handler="archiso_mount_handler"
 }
 
 archiso_mount_handler() {
     newroot="${1}"
 
-    msg -n ":: Mounting tmpfs, size=${tmpfs_size}..."
-    mount -t tmpfs -o "size=${tmpfs_size}" tmpfs /tmpfs
+    msg -n ":: Mounting newroot, size=${tmpfs_size}..."
+    mount -t tmpfs -o "size=${tmpfs_size}" tmpfs /new_root
     msg "done."
 
-    if [ "${copytoram}" = "y" ]; then
-        msg -n ":: Mounting tmpfs (for squashfs), size=${tmpfs_sqfs_size}..."
-        mount -t tmpfs -o "size=${tmpfs_sqfs_size}" tmpfs /tmpfs.sqfs
-        msg "done."
-    fi
+    usbdelay=1
+    usbdelay=$(( ${usbdelay:-0} + 1 ))
+    msg "Waiting ${usbdelay}s for USB devices"
+    sleep "${usbdelay}"
+
+    found=0
 
     modprobe -q loop max_loop=255 >/dev/null 2>&1
     modprobe -q isofs >/dev/null 2>&1
     modprobe -q ext4 >/dev/null 2>&1
     _find_device
-
-    msg ":: Waiting for boot device..."
-    while ! poll_device ${archisodevice} 30; do
-        echo "ERROR: boot device didn't show up after 30 seconds..."
-        echo "   Falling back to interactive prompt"
-        echo "   You can try to fix the problem manually, log out when you are finished"
-        launch_interactive_shell
-    done
 
     if [ "${found}" = "0" ]; then
         echo "   Falling back to interactive prompt"
@@ -195,29 +188,27 @@ archiso_mount_handler() {
         launch_interactive_shell
     fi
 
-    msg ":: Mounting root (aufs) filesystem"
-    /bin/mount -t aufs -o nowarn_perm,dirs=/tmpfs=rw none "${newroot}"
-    if [ $? -ne 0 ]; then
-        echo "ERROR: while mounting root (aufs) filesystem."
-        exit 1
+    if [ "x${findiso}" != "x" ]; then
+        _find_iso
     fi
 
-    msg ":: Mounting images"
-    MODULES=$(find ${bootmnt} -name "*.sqfs" -type f)
-    for m in ${MODULES}; do
-        msg ":: Mounting module ${m}"
-        _mnt_squashfs ${m} ${newroot}
-        mkdir -p ${newroot}/mnt/live/memory/images/$(basename ${m})
-        _mnt_move /tmpfs/mnt/$(basename ${m} .sqfs) ${newroot}/mnt/live/memory/images/$(basename ${m})
-    done
+    msg ":: copying filesystem..."
+    copy_fs
 
     # Move our bootmnt dir into the live system
-    _mnt_move /bootmnt "${newroot}/bootmnt"
+    echo "tmpfs / tmpfs defaults 0 0" > ${newroot}/etc/fstab
+    _mnt_move ${BOOT_MOUNT} ${newroot}/mnt/${BOOT_MOUNT##*/}
 
-    # Move changes folder
-    _mnt_move /tmpfs ${newroot}/mnt/live/memory/changes
+    if [ "x${findiso}" != "x" ]; then
+        _mnt_move ${BOOT_ORIG} ${newroot}/mnt/${BOOT_ORIG##*/}
+    fi
 
-    if [ "${copytoram}" != "y" ]; then
+    if [ "${break}" = "y" ]; then
+        msg ":: Break requested, type 'exit' to resume operation"
+        launch_interactive_shell
+    fi
+
+    if [ "${copy2ram}" != "y" ]; then
         if [ "${FSTYPE}" = "iso9660" ] || [ "${FSTYPE}" = "udf" ]; then
             if [ -d /proc/sys/dev/cdrom ]; then
                 echo 0 > /proc/sys/dev/cdrom/lock
