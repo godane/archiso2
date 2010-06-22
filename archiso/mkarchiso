@@ -152,7 +152,7 @@ _kversion ()
 _bootfiles () {
     mkdir -p ${iso_dir}/boot/isolinux
     cp -f ${INSTROOT}/${MAP26} ${iso_dir}/boot/
-    cp -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/
+    cp -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
     cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
     cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
     cp -rf ${PROFILE}/boot-files/* ${iso_dir}/boot/
@@ -225,7 +225,7 @@ _imgprepare () {
     kernelver=$(_kversion)
     basedir=${INSTROOT}
     [ "${INSTROOT:0:1}" != "/" ] && basedir="$(pwd)/${INSTROOT}"
-    _mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/archiso.img"
+    _mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/initrd.img"
 }
 
 _rmstuff () {
@@ -302,6 +302,10 @@ to the iso/ directory.
         rm -R "${sync_dir}/var/lib/pacman/sync"
     fi
 
+    if [ -e "${sync_dir}/var/lib/pacman/db.lck" ]; then
+        rm -f ${sync_dir}/var/lib/pacman/db.lck
+    fi
+
     info "====> Installing packages to '${rootimg_dir}'"
     for mod in ${MODULES}; do
         if [ ! -d ${modules_dir}/${mod} ]; then
@@ -316,7 +320,9 @@ to the iso/ directory.
         if [ ! -d "${sync_dir}/var/lib/pacman/sync/core" ]; then
 	    mkdir -p ${sync_dir}/var/lib/pacman
             pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
-            rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
+            if [ -d ${sync_dir}/var/lib/pacman/local ]; then
+                rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
+            fi
         fi
         
         if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
