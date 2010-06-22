@@ -1,4 +1,15 @@
 base
+chakra-hardware-detection
+b43-fwcutter
+ipw2100-fw
+ipw2200-fw
+zd1211-firmware
+intel-536ep
+intel-536ep-utils
+intel-537
+intel-537-utils
+madwifi
+madwifi-utils
 aif
 aufs2
 aufs2-util
@@ -18,6 +29,7 @@ mkinitcpio-nfs-utils
 nbd
 ndiswrapper
 ndiswrapper-utils
+netcfg
 nfs-utils
 nmap
 ntfs-3g

@@ -1,7 +1,9 @@
 # /etc/fstab: static file system information
-# <file system>        <dir>         <type>    <options>          <dump> <pass>
-aufs                   /             aufs      noauto              0      0
-none                   /dev/pts      devpts    defaults            0      0
-none                   /dev/shm      tmpfs     defaults            0      0
+# <file system>    <dir>                  <type>    <options>   <dump> <pass>
+aufs               /                      aufs      noauto      0      0
+none               /dev/pts               devpts    defaults    0      0
+none               /dev/shm               tmpfs     defaults    0      0
+tmpfs              /tmp	                  tmpfs     defaults    0      0
+tmpfs		   /var/lib/pacman/sync   tmpfs     defaults    0      0
 
 ### Auto generated entries get added here:

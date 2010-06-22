@@ -1,1 +1,2 @@
-MODULES="base"
+MODULES="a.000.base a.001.baseapp a.002.baselib a.003.xorg a.004.xfce a.005.minilib a.006.miniapp a.007.firefox"
+RMSTUFF=y

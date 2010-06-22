@@ -2,7 +2,20 @@
 . /etc/rc.conf
 . /etc/rc.d/functions
 . /etc/archiso/functions
+. /usr/lib/liblinuxlive
 
+sound ()
+{
+    VOL=$(cmdline_value "vol")
+    if [ "$VOL" = "" ]; then
+        VOL="90%"
+    fi
+    stat_busy "Setting sound volume: ${VOL}%"
+    for SCONTROL in {"Master","PCM","Front","Surround","Center","CD","Video"}; do
+      /usr/bin/amixer -q sset $SCONTROL ${VOL} unmute 2>/dev/null
+    done
+    stat_done
+}
 
 scan_network ()
 {
@@ -62,14 +75,6 @@ do_homedir ()
     stat_done
 }
 
-do_makeuser ()
-{
-    stat_busy "Making the default user arch"
-    addgroups="audio,disk,optical,wheel"
-    useradd -m -p "" -g users -G $addgroups arch
-    stat_done
-}
-
 do_locale_gen ()
 {
     stat_busy "Generating locales..."
@@ -78,19 +83,10 @@ do_locale_gen ()
     stat_done
 }
 
-# GIT does not manage perms others thans 755 and 644, so fix here.
-do_fix_perms ()
-{
-    stat_busy "Fixing file permissions..."
-    chmod 440 /etc/sudoers
-    stat_done
-}
-
 case "$1" in
   start)
     do_locale_gen
-    do_makeuser
-    do_fix_perms
+    sound
     ;;
 esac
 exit 0
