@@ -349,7 +349,7 @@ fs_options()
 }
 
 # discover filesystem used on the given device
-# Use vfat for msdos filesystem. Use ntfs-3g for ntfs if ntfsmount exists.
+# Use vfat for msdos filesystem. Use ntfs-3g for ntfs if ntfs-3g exists.
 # $1 = device, eg. /dev/hda1
 #
 device_filesystem()
@@ -357,7 +357,7 @@ device_filesystem()
    debug_log "device_filesystem" "$*"
    local NTFS
 
-   if [ -e /bin/ntfsmount ]; then NTFS="ntfs-3g"; else NTFS="ntfs"; fi
+   if [ -e /bin/ntfs-3g ]; then NTFS="ntfs-3g"; else NTFS="ntfs"; fi
    blkid -s TYPE "$1" -o value | sed "s/msdos/vfat/" | sed "s/ntfs/$NTFS/"
 }
 
@@ -369,7 +369,7 @@ is_supported_filesystem()
 {
    debug_log "is_supported_filesystem" "$*"
 
-   if [ -e /bin/ntfsmount -a "$1" = "ntfs-3g" ]; then
+   if [ -e /bin/ntfs-3g -a "$1" = "ntfs-3g" ]; then
       return 0
    fi
 
@@ -404,7 +404,7 @@ mount_device()
    OPTIONS=$(echo "$OPTIONS" | sed -r "s/^,+//")
 
    if [ "$FS" = "-t ntfs-3g" ]; then
-      ntfsmount "$DEV" "$2" -o $OPTIONS >/dev/null 2>&1
+      ntfs-3g "$DEV" "$2" -o $OPTIONS >/dev/null 2>&1
       ERR=$?
    else
       mount -n -o $OPTIONS $FS "$DEV" "$2" >/dev/null 2>&1
@@ -1000,7 +1000,7 @@ rmmod_unused_modules()
 
 # kill all unneeded processes, which have bigger PID then the PID of
 # current shell. We can't use killall5, as it would kill some processes
-# which may be currently needed, for example ntfsmount.
+# which may be currently needed, for example ntfs-3g.
 # $1 = maximum pid (kill all lower)
 #
 killall_unneeded()
