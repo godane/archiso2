@@ -15,6 +15,8 @@ KERNEL="/etc/mkinitcpio.d/kernel26.kver"
 CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
 CDNAME="archiso-live"
 RMSTUFF=n
+EXT="sqfs"
+MKOPTION="-b 256k"
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -179,9 +181,9 @@ _overlay() {
     fi
 
     if [ "${QUIET}" = "y" ]; then
-        mksquashfs "${modules_dir}/overlay" "${iso_dir}/${CDNAME}/optional/overlay.sqfs" -noappend >/dev/null
+        mksquashfs "${modules_dir}/overlay" "${iso_dir}/${CDNAME}/optional/overlay.${EXT}" -noappend ${MKOPTION} >/dev/null
     else
-        mksquashfs "${modules_dir}/overlay" "${iso_dir}/${CDNAME}/optional/overlay.sqfs" -noappend
+        mksquashfs "${modules_dir}/overlay" "${iso_dir}/${CDNAME}/optional/overlay.${EXT}" -noappend ${MKOPTION}
     fi
 
 }
@@ -276,7 +278,7 @@ command_create () {
     echo "README for this archiso created directory
 
 All directories in this dir, except for 'iso' will be squashed
-with squashfs and put into the iso dir as iso/${CDNAME}/base/<dirname>.sqfs
+with squashfs and put into the iso dir as iso/${CDNAME}/base/<dirname>.${EXT}
 The squashfs images will be auto detected on boot.
 
 The iso dir is later used to build the actual bootable iso.
@@ -298,10 +300,6 @@ to the iso/ directory.
     fi
 
     # in case of if you have to kill mkarchiso cause of something
-    if [ -d "${sync_dir}/var/lib/pacman/sync" ]; then
-        rm -R "${sync_dir}/var/lib/pacman/sync"
-    fi
-
     if [ -e "${sync_dir}/var/lib/pacman/db.lck" ]; then
         rm -f ${sync_dir}/var/lib/pacman/db.lck
     fi
@@ -383,7 +381,7 @@ _mksquash () {
     fi
 
     time_dir=${2}
-    sqimg="${isobasemod_dir}/$(basename ${1}).sqfs"
+    sqimg="${isobasemod_dir}/$(basename ${1}).${EXT}"
     info "====> Generating SquashFS image for '${1}'"
     if [ -e "${sqimg}" ]; then
         dirhaschanged=$(find ${1}${time_dir} -newer ${sqimg})
@@ -399,9 +397,9 @@ _mksquash () {
     info "Creating SquashFS image. This may take some time..."
     start=$(date +%s)
     if [ "${QUIET}" = "y" ]; then
-        mksquashfs "${1}" "${sqimg}" -noappend >/dev/null
+        mksquashfs "${1}" "${sqimg}" -noappend ${MKOPTION} >/dev/null
     else
-        mksquashfs "${1}" "${sqimg}" -noappend
+        mksquashfs "${1}" "${sqimg}" -noappend ${MKOPTION}
     fi
     minutes=$(echo $start $(date +%s) | awk '{ printf "%0.2f",($2-$1)/60 }')
     info "Image creation done in $minutes minutes."
