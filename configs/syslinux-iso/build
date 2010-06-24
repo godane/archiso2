@@ -1,0 +1,50 @@
+#!/bin/bash
+
+source config
+
+#if [ "${2}" = "i686" -o "${2}" = "x86_64" ]; then
+#	ARCH=$2
+#else
+#	ARCH=i686
+#fi
+
+WORKDIR=.working
+DATE="$(date +%F)"
+ISONAME=$CDNAME-${DATE}.iso
+
+makeinstall()
+{
+	mkarchiso -f create "${WORKDIR}"
+}
+
+makeiso() 
+{
+	mkarchiso -f all "${WORKDIR}" "${ISONAME}"
+}
+
+makeimg()
+{
+	mkarchiso -f iso "${WORKDIR}" "${ISONAME}"
+}
+
+clean()
+{
+	rm -rf "${WORKDIR}" "${ISONAME}"
+}
+
+
+if [ "${1}" = "makeinstall" ]; then
+	makeinstall
+fi
+
+if [ "${1}" = "makeiso" ]; then
+	makeiso
+fi
+
+if [ "${1}" = "makeimg" ]; then
+	makeimg
+fi
+
+if [ "${1}" = "clean" ]; then
+	clean
+fi
