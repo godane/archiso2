@@ -17,6 +17,7 @@ CDNAME="archiso-live"
 RMSTUFF=n
 EXT="sqfs"
 MKOPTION="-b 256k"
+MODULES=""
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -29,16 +30,16 @@ usage ()
 {
     echo "usage ${APPNAME} [options] command <command options>"
     echo " general options:"
-    echo "    -f               Force overwrite of working files/squashfs image/bootable image"
-    echo "    -p PACKAGE(S)    Additional package(s) to install, can be used multiple times"
-    echo "    -C <file>        Config file for pacman. Default $PACCONFIG"
-    echo "    -M <modules>     Squashfs modules of iso."
-    echo "    -L <label>       Set a label for the disk"
-    echo "    -P <publisher>   Set a publisher for the disk"
-    echo "    -A <application> Set an application name for the disk"
-    echo "    -d               Create default user directory /home/arch"
-    echo "    -v               Enable verbose output"
-    echo "    -h               This message"
+    echo "    -f                Force overwrite of working files/squashfs image/bootable image"
+    echo "    -p PACKAGE(S)     Additional package(s) to install, can be used multiple times"
+    echo "    -C <file>         Config file for pacman. Default $PACCONFIG"
+    echo "    -m <base_modules> Squashfs base folder modules of iso."
+    echo "    -L <label>        Set a label for the disk"
+    echo "    -P <publisher>    Set a publisher for the disk"
+    echo "    -A <application>  Set an application name for the disk"
+    echo "    -d                Create default user directory /home/arch"
+    echo "    -v                Enable verbose output"
+    echo "    -h                This message"
     echo " commands:"
     echo "   create <dir>"
     echo "      create a base directory layout to work with"
@@ -50,12 +51,12 @@ usage ()
     exit $1
 }
 
-while getopts 'p:C:M:L:P:A:dfvh' arg; do
+while getopts 'p:C:m:L:P:A:dfvh' arg; do
     case "${arg}" in
         p) PKGLIST="${PKGLIST} ${OPTARG}" ;;
         C) PACCONFIG="${OPTARG}" ;;
     	L) LABEL="${OPTARG}" ;;
-        M) MODULES="${OPTARG}" ;;
+        m) BASE_MODULES="${OPTARG}" ;;
     	P) PUBLISHER="${OPTARG}" ;;
     	A) APPLICATION="${OPTARG}" ;;
         d) CREATE_DEFAULT="y" ;;
@@ -115,6 +116,12 @@ lastbr_dir="${work_dir}/empty"
 INSTROOT="${modules_dir}/$(basename ${ROOT_MOD} .list)"
 sync_dir="${work_dir}/empty"
 sgn_file="${iso_dir}/${CDNAME}/livecd.sgn"
+
+if [ "${MODULES}" != "" ]; then
+    UNION_MODULES="${BASE_MODULES} ${MODULES}"
+elif [ "${MODULES}" = "" ]; then
+    UNION_MODULES="${BASE_MODULES}"
+fi
 
 echo "${APPNAME} : Configuration Settings"
 echo "        working directory:   ${work_dir}"
@@ -232,31 +239,31 @@ _imgprepare () {
 
 _rmstuff () {
     if [ "${RMSTUFF}" = "y" ]; then
-        for MODULE in ${MODULES}; do
+        for m in ${UNION_MODULES}; do
             if [ -f "${PROFILE}/list/rmlocale" ]; then
                 cat "${PROFILE}/list/rmlocale" | grep -v "^#" | while read rmlocale; do
-                    if [ -d "${modules_dir}/${MODULE}/usr/share/locale/${rmlocale}" ]; then
-                        info "Removing locale $rmlocale from ${MODULE}"
-                        rm -Rf ${modules_dir}/${MODULE}/usr/share/locale/${rmlocale}
+                    if [ -d "${modules_dir}/${m}/usr/share/locale/${rmlocale}" ]; then
+                        info "Removing locale $rmlocale from ${m}"
+                        rm -Rf ${modules_dir}/${m}/usr/share/locale/${rmlocale}
                     fi
                 done
             fi
 
             if [ -f "${PROFILE}/list/remove" ]; then
                 cat "${PROFILE}/list/remove" | grep -v "^#" | while read remove; do
-                    if [ -e "${modules_dir}/${MODULE}/${remove}" ]; then
-                        info "Removing $remove from ${MODULE}"
-                        rm -Rf ${modules_dir}/${MODULE}/${remove}
+                    if [ -e "${modules_dir}/${m}/${remove}" ]; then
+                        info "Removing $remove from ${m}"
+                        rm -Rf ${modules_dir}/${m}/${remove}
                     fi
                 done
             fi
-            info "Removing .pyc files from ${MODULE}"
-            RMPYC=$(find ${modules_dir}/${MODULE}/ -name "*.pyc")
+            info "Removing .pyc files from ${m}"
+            RMPYC=$(find ${modules_dir}/${m}/ -name "*.pyc")
             rm -Rf ${RMPYC}
-            info "Uncompressing .gz files in ${MODULE}"
-            find -H ${modules_dir}/${MODULE}/ -name "*.gz" -exec gunzip -qf {} \; >/dev/null
-            if [ -f ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir ]; then
-                sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir
+            info "Uncompressing .gz files in ${m}"
+            find -H ${modules_dir}/${m}/ -name "*.gz" -exec gunzip -qf {} \; 2>/dev/null
+            if [ -f ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir ]; then
+                sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir
             fi
         done
     fi
@@ -302,7 +309,7 @@ to the iso/ directory.
     fi
 
     info "====> Installing packages to '${rootimg_dir}'"
-    for mod in ${MODULES}; do
+    for mod in ${UNION_MODULES}; do
         if [ ! -d ${modules_dir}/${mod} ]; then
             mkdir -p ${modules_dir}/${mod}
         fi
@@ -342,7 +349,7 @@ to the iso/ directory.
 
     done
     info "Making package list"
-    pacman -Q -r ${union} > ${iso_dir}/packages.list
+    pacman -Q -r ${rootimg_dir} > ${iso_dir}/packages.list
 
     info "Unmounting union"
     umount -l "${rootimg_dir}"
@@ -380,8 +387,13 @@ _mksquash () {
         return 1
     fi
 
-    time_dir=${2}
-    sqimg="${isobasemod_dir}/$(basename ${1}).${EXT}"
+    if [ ! -d "$2" ]; then
+        error "Error: '$2' is not a directory"
+        return 1
+    fi
+
+    time_dir=/var/lib/pacman/local
+    sqimg="${2}/$(basename ${1}).${EXT}"
     info "====> Generating SquashFS image for '${1}'"
     if [ -e "${sqimg}" ]; then
         dirhaschanged=$(find ${1}${time_dir} -newer ${sqimg})
@@ -406,11 +418,19 @@ _mksquash () {
 }
 
 _imgcommon () {
-    for m in ${MODULES}; do
+    for m in ${BASE_MODULES}; do
         if [ -d "${modules_dir}/$m" ]; then
-            _mksquash "${modules_dir}/$m" /var/lib/pacman/local
+            _mksquash "${modules_dir}/$m" "${isobasemod_dir}"
         fi
     done
+
+    if [ "${MODULES}" != "" ]; then
+        for MOD in ${MODULES}; do
+            if [ -d "${modules_dir}/${MOD}" ]; then
+                _mksquash "${modules_dir}/${MOD}" "${isomodules_dir}"
+            fi
+        done
+    fi
 
     info "====> Making bootable image"
 
