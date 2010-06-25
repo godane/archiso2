@@ -254,10 +254,7 @@ _rmstuff () {
             RMPYC=$(find ${modules_dir}/${MODULE}/ -name "*.pyc")
             rm -Rf ${RMPYC}
             info "Uncompressing .gz files in ${MODULE}"
-            FINDGZ=$(find ${modules_dir}/${MODULE}/ -name "*.gz" -type f)
-            if [ -f "${FINDGZ}" ]; then
-                gunzip -q ${FINDGZ}
-            fi
+            find -H ${modules_dir}/${MODULE}/ -name "*.gz" -exec gunzip -qf {} \; >/dev/null
             if [ -f ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir ]; then
                 sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${MODULE}/usr/share/fonts/misc/fonts.dir
             fi
@@ -344,6 +341,9 @@ to the iso/ directory.
         fi
 
     done
+    info "Making package list"
+    pacman -Q -r ${union} > ${iso_dir}/packages.list
+
     info "Unmounting union"
     umount -l "${rootimg_dir}"
 
@@ -459,6 +459,7 @@ command_iso () {
         -V "${LABEL}" \
         -o "${imgname}" "${iso_dir}"
     isohybrid "${imgname}"
+    md5sum "${imgname}" > "${imgname}".md5
 }
 
 # Go through the main commands in order. If 'all' was specified, then we want
