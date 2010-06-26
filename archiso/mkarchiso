@@ -1,6 +1,5 @@
 #! /bin/bash
 
-PKGLIST=""
 QUIET="y"
 FORCE="n"
 export LABEL="ARCH_$(date +%Y%m)"
@@ -8,11 +7,9 @@ PUBLISHER="Arch Linux <http://www.archlinux.org>"
 APPLICATION="Arch Linux Live/Rescue CD"
 CREATE_DEFAULT="n"
 PROFILE=$(pwd)
-ROOT_MOD="$(ls -1 ${PROFILE}/list | head -1)"
 VMLINUZ="boot/vmlinuz26"
 MAP26="boot/System.map26"
 KERNEL="/etc/mkinitcpio.d/kernel26.kver"
-CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
 CDNAME="archiso-live"
 RMSTUFF=n
 EXT="sqfs"
@@ -31,7 +28,7 @@ usage ()
     echo "usage ${APPNAME} [options] command <command options>"
     echo " general options:"
     echo "    -f                Force overwrite of working files/squashfs image/bootable image"
-    echo "    -p PACKAGE(S)     Additional package(s) to install, can be used multiple times"
+    echo "    -p <profile>      Profile of working configs for iso. Default $PROFILE"
     echo "    -C <file>         Config file for pacman. Default $PACCONFIG"
     echo "    -m <base_modules> Squashfs base folder modules of iso."
     echo "    -L <label>        Set a label for the disk"
@@ -53,7 +50,7 @@ usage ()
 
 while getopts 'p:C:m:L:P:A:dfvh' arg; do
     case "${arg}" in
-        p) PKGLIST="${PKGLIST} ${OPTARG}" ;;
+        p) PROFILE="${OPTARG}" ;;
         C) PACCONFIG="${OPTARG}" ;;
     	L) LABEL="${OPTARG}" ;;
         m) BASE_MODULES="${OPTARG}" ;;
@@ -67,9 +64,6 @@ while getopts 'p:C:m:L:P:A:dfvh' arg; do
     esac
 done
 
-#trim spaces
-PKGLIST="$(echo $PKGLIST)"
-
 shift $(($OPTIND - 1))
 
 # do UID checking here so someone can at least get usage instructions
@@ -81,6 +75,9 @@ fi
 if [ -f ${PROFILE}/config ]; then
 	source ${PROFILE}/config
 fi
+
+ROOT_MOD="$(ls -1 ${PROFILE}/list | head -1)"
+CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
 
 if [ -f "${PROFILE}/pacman.conf" ]; then
     PACCONFIG="${PROFILE}/pacman.conf"
