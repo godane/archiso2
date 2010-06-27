@@ -1,0 +1,40 @@
+
+. /etc/rc.d/functions
+
+fix_rc_conf ()
+{
+    sed -i 's/^.*DAEMONS=.*/DAEMONS=(syslog-ng hal network archiso wicd slim)/' /etc/rc.conf 
+}
+
+do_makeuser ()
+{
+    stat_busy "Making the default user arch"
+    cp -af /etc/skel /home/arch
+    chown -R 1000:100 /home/arch
+    stat_done
+}
+
+do_rootuser ()
+{
+    stat_busy "Making the default root user"
+    cp -af /etc/skel /root
+    chown -R root:root /root
+    stat_done
+}
+
+# GIT does not manage perms others thans 755 and 644, so fix here.
+do_fix_perms ()
+{
+    stat_busy "Fixing file permissions..."
+    chmod 440 /etc/sudoers
+    stat_done
+}
+
+case "$1" in
+  start)
+    fix_rc_conf
+    do_makeuser
+    do_fix_perms
+    ;;
+esac
+exit 0

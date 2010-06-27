@@ -1,0 +1,18 @@
+MODULES="ap.008.xlibs ap.009.xapps ap.010.games"
+BASE_MODULES="a.001.core a.002.xorg a.003.firefox a.004.libs a.005.apps a.006.devel a.007.xfce"
+RMSTUFF=y
+CDNAME="archiso-live"
+LABEL="Archiso-live"
+PUBLISHER="http://godane.wordpress.com/"
+#AUTHOR="Christopher Rogers aka Godane"
+# when using mksquashfs with lzma 4.0
+NOLZMA=n
+
+if [ "${NOLZMA}" = "y" ]; then
+    EXT="sqfs"
+    MKOPTION="-comp gzip"
+else
+    EXT="lzm"
+    MKOPTION="-comp lzma -b 256k"
+fi
+
