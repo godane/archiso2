@@ -12,7 +12,7 @@ install ()
     FILES=""
     #add_dir /tmpfs
     #add_dir /tmpfs.sqfs
-    #add_dir /bootmnt
+    add_dir /bootmnt
     #add_dir /tmpfs/mnt/live/memory/changes
     #add_dir /tmpfs/mnt/live/memory/images
     add_dir /tmp
