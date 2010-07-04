@@ -15,6 +15,8 @@ RMSTUFF=n
 EXT="sqfs"
 MKOPTION="-b 256k"
 MODULES=""
+modlocale="a.099.locale"
+modmove="a.099.etc"
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -157,8 +159,16 @@ _kversion ()
 
 _bootfiles () {
     mkdir -p ${iso_dir}/boot/isolinux
-    cp -f ${INSTROOT}/${MAP26} ${iso_dir}/boot/
-    cp -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
+    if [ -f ${INSTROOT}/${MAP26} ]; then
+        cp -f ${INSTROOT}/${MAP26} ${iso_dir}/boot/
+    else
+        cp -f ${INSTROOT}/${MAP26}* ${iso_dir}/boot/
+    fi
+    if [ -f ${INSTROOT}/${VMLINUZ} ]; then
+        cp -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
+    else
+        cp -f ${INSTROOT}/${VMLINUZ}* ${iso_dir}/boot/vmlinuz
+    fi
     cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
     cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
     cp -rf ${PROFILE}/boot-files/* ${iso_dir}/boot/
@@ -166,6 +176,7 @@ _bootfiles () {
     cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
     cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
     cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
+    cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/isolinux/
 }
 
 _overlay() {
@@ -266,6 +277,41 @@ _rmstuff () {
     fi
 }
 
+_mvstuff () {
+    if [ "${MVSTUFF}" = "y" ]; then
+        for m in ${UNION_MODULES}; do
+            if [ -f "${PROFILE}/list/mvlocate" ]; then
+                cat "${PROFILE}/list/mvlocale" | grep -v "^#" | while read mvlocale; do
+                    if [ -d "${modules_dir}/${m}/usr/share/locale/${mvlocale}" ]; then
+                        info "Moving locale ${mvlocale} from ${m} to ${modlocale}"
+                        mkdir -p ${modules_dir}/${modlocale}/usr/share/locale
+                        mv -f ${modules_dir}/${m}/usr/share/locale/${mvlocale} ${modules_dir}/${modlocale}/usr/share/locale
+                    fi
+                done
+            fi
+            if [ -f "${PROFILE}/list/move" ]; then
+                cat "${PROFILE}/list/move" | grep -v "^#" | while read move; do
+                    if [ -d "${modules_dir}/${m}/${move}" ]; then
+                        info "Moving $move from ${m} to ${modmove}"
+                        move_dir=$(dirname ${move})
+                            if [ ! -d ${modules_dir}/${modmove}/${move_dir} ]; then
+                                mkdir -p ${modules_dir}/${modmove}/${move_dir}
+                            fi
+                        cp -a ${modules_dir}/${m}/${move} ${modules_dir}/${modmove}/${move_dir}
+                        rm -Rf ${modules_dir}/${m}/${move}
+                    fi
+                    info "Moving .a files from ${m} to ${modmove}"
+                    if [ ! -d ${modules_dir}/${modmove}/usr/lib ]; then
+                        mkdir -p ${modules_dir}/${modmove}/usr/lib
+                    fi
+                    find ${modules_dir}/${m}/usr/lib -name "*.a" -maxdepth 1 -exec cp -af {} ${modules_dir}/${modmove}/usr/lib \;
+                    find ${modules_dir}/${m}/usr/lib -name "*.a" -maxdepth 1 -exec rm -f {} \;
+                done
+            fi
+        done
+    fi
+}
+
 command_create () {
     info "====> Creating working directory: ${work_dir}"
     mkdir -p "${iso_dir}"
@@ -301,6 +347,13 @@ to the iso/ directory.
     fi
 
     # in case of if you have to kill mkarchiso cause of something
+    if [ -d "${sync_dir}/var/lib/pacman" ]; then
+        # Delete pacman database sync cache files (*.tar.gz)
+        find "${sync_dir}/var/lib/pacman" -maxdepth 1 -type f -delete
+        # Delete pacman database sync cache
+        find "${sync_dir}/var/lib/pacman/sync" -delete
+    fi
+
     if [ -e "${sync_dir}/var/lib/pacman/db.lck" ]; then
         rm -f ${sync_dir}/var/lib/pacman/db.lck
     fi
@@ -344,12 +397,22 @@ to the iso/ directory.
             fi
         fi
 
+    # Delete all log files, keeps empty dirs.
+    find "${work_dir}/${mod}/var/log" -type f -delete
+
+    # Delete all temporary files and dirs
+    find "${work_dir}/${mod}/var/tmp" -mindepth 1 -delete
+
     done
+
     info "Making package list"
     pacman -Q -r ${rootimg_dir} > ${iso_dir}/packages.list
 
     info "Unmounting union"
     umount -l "${rootimg_dir}"
+
+    info "Moving stuff"
+    _mvstuff
 
     info "Removing stuff"
     _rmstuff
@@ -427,6 +490,16 @@ _imgcommon () {
                 _mksquash "${modules_dir}/${MOD}" "${isomodules_dir}"
             fi
         done
+    fi
+    
+    if [ "${MVSTUFF}" = "y" ]; then
+       if [ -d "${modules_dir}/${modlocale}" ]; then
+           _mksquash "${modules_dir}/${modlocale}" "${isomodules_dir}"
+       fi
+
+       if [ -d "${modules_dir}/${modmove}" ]; then
+          _mksquash "${modules_dir}/${modmove}" "${isomodules_dir}"
+       fi
     fi
 
     info "====> Making bootable image"
