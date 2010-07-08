@@ -7,16 +7,15 @@ PUBLISHER="Arch Linux <http://www.archlinux.org>"
 APPLICATION="Arch Linux Live/Rescue CD"
 CREATE_DEFAULT="n"
 PROFILE=$(pwd)
-VMLINUZ="boot/vmlinuz26"
-MAP26="boot/System.map26"
-KERNEL="/etc/mkinitcpio.d/kernel26.kver"
+ver=""
 CDNAME="archiso-live"
 RMSTUFF=n
+MVSTUFF=n
 EXT="sqfs"
 MKOPTION="-b 256k"
 MODULES=""
-modlocale="a.099.locale"
-modmove="a.099.etc"
+modlocale="z.099.locale"
+modmove="z.099.etc"
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -78,6 +77,9 @@ if [ -f ${PROFILE}/config ]; then
 	source ${PROFILE}/config
 fi
 
+VMLINUZ="boot/vmlinuz26${ver}"
+MAP26="boot/System.map26${ver}"
+KERNEL="/etc/mkinitcpio.d/kernel26${ver}.kver"
 ROOT_MOD="$(ls -1 ${PROFILE}/list | head -1)"
 CPIOCONFIG="${PROFILE}/mkinitcpio.conf"
 
@@ -160,14 +162,10 @@ _kversion ()
 _bootfiles () {
     mkdir -p ${iso_dir}/boot/isolinux
     if [ -f ${INSTROOT}/${MAP26} ]; then
-        cp -f ${INSTROOT}/${MAP26} ${iso_dir}/boot/
-    else
-        cp -f ${INSTROOT}/${MAP26}* ${iso_dir}/boot/
+        mv -f ${INSTROOT}/${MAP26} ${iso_dir}/${MAP26}
     fi
     if [ -f ${INSTROOT}/${VMLINUZ} ]; then
-        cp -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
-    else
-        cp -f ${INSTROOT}/${VMLINUZ}* ${iso_dir}/boot/vmlinuz
+        mv -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
     fi
     cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
     cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
@@ -279,7 +277,7 @@ _rmstuff () {
 
 _mvstuff () {
     if [ "${MVSTUFF}" = "y" ]; then
-        for m in ${UNION_MODULES}; do
+        for m in ${BASE_MODULES}; do
             if [ -f "${PROFILE}/list/mvlocate" ]; then
                 cat "${PROFILE}/list/mvlocale" | grep -v "^#" | while read mvlocale; do
                     if [ -d "${modules_dir}/${m}/usr/share/locale/${mvlocale}" ]; then
@@ -304,8 +302,8 @@ _mvstuff () {
                     if [ ! -d ${modules_dir}/${modmove}/usr/lib ]; then
                         mkdir -p ${modules_dir}/${modmove}/usr/lib
                     fi
-                    find ${modules_dir}/${m}/usr/lib -name "*.a" -maxdepth 1 -exec cp -af {} ${modules_dir}/${modmove}/usr/lib \;
-                    find ${modules_dir}/${m}/usr/lib -name "*.a" -maxdepth 1 -exec rm -f {} \;
+                    find ${modules_dir}/${m}/usr/lib -maxdepth 1 -name "*.*a" -exec cp -af {} ${modules_dir}/${modmove}/usr/lib \;
+                    find ${modules_dir}/${m}/usr/lib -maxdepth 1 -name "*.*a" -exec rm -f {} \;
                 done
             fi
         done
@@ -385,7 +383,7 @@ to the iso/ directory.
                 cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
                     #_pacman "${pkgname}"
                     info "Installing package $pkgname"
-                    mkarchroot -C "$PACONFIG" -f ${rootimg_dir} "$pkgname"
+                    mkarchroot -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname"
                 done
             fi
 
