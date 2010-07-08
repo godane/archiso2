@@ -523,6 +523,11 @@ _imgcommon () {
             exit 1
         fi
     fi
+
+    if ! sed "s|cdname=[^ ]*|cdname=${CDNAME}|" -i ${iso_dir}/boot/isolinux/isolinux.cfg; then
+        error "Error: ${iso_dir}/boot/isolinux/isolinux.cfg, doesn't exist.aborting."
+        exit 1
+    fi
 }
 
 command_iso () {
