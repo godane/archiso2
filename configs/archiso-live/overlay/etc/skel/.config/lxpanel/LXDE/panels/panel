@@ -11,12 +11,15 @@ Global {
     transparent=0
     tintcolor=#000000
     alpha=0
+    autohide=0
+    heightwhenhidden=2
     setdocktype=1
     setpartialstrut=1
     usefontcolor=1
     fontcolor=#ffffff
     background=1
     backgroundfile=/usr/share/lxpanel/images/background.png
+    iconsize=24
 }
 
 Plugin {
@@ -29,7 +32,7 @@ Plugin {
 Plugin {
     type = menu
     Config {
-        image=/usr/share/lxpanel/images/my-computer.png
+        image=/usr/share/lxde/images/lxde-icon.png
         system {
         }
         separator {
@@ -53,10 +56,10 @@ Plugin {
             id=pcmanfm.desktop
         }
         Button {
-            id=lxterminal.desktop
+            id=firefox.desktop
         }
         Button {
-            id=firefox.desktop
+            id=/usr/share/applications/lxterminal.desktop
         }
     }
 }
@@ -71,8 +74,10 @@ Plugin {
 Plugin {
     type = wincmd
     Config {
+        image=window-manager
         Button1=iconify
         Button2=shade
+        Toggle=0
     }
 }
 
@@ -100,20 +105,14 @@ Plugin {
     Config {
         tooltips=1
         IconsOnly=0
-        AcceptSkipPager=1
-        ShowIconified=1
-        ShowMapped=1
         ShowAllDesks=0
         UseMouseWheel=1
         UseUrgencyHint=1
         FlatButton=0
         MaxTaskWidth=150
         spacing=1
+        GroupedTasks=0
     }
-}
-
-Plugin {
-    type = netstat
 }
 
 Plugin {
@@ -130,6 +129,7 @@ Plugin {
         ClockFmt=%R
         TooltipFmt=%A %x
         BoldFont=0
+        IconOnly=0
     }
 }
 

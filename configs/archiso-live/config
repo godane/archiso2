@@ -1,5 +1,8 @@
 MODULES="ap.008.xlibs ap.009.xapps ap.010.games"
 BASE_MODULES="a.001.core a.002.xorg a.003.firefox a.004.libs a.005.apps a.006.devel a.007.xfce"
+#MODULES="a.007.devel a.008.xlibs a.009.xapps a.010.games a.011.pwn"
+#BASE_MODULES="a.001.core a.002.xorg a.003.lxde a.004.libs a.005.apps a.006.firefox"
+ver="-zen"
 RMSTUFF=y
 CDNAME="archiso-live"
 LABEL="Archiso-live"

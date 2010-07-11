@@ -84,7 +84,7 @@ merge()
 	
 	mkdir -p $TMPDIR/var/lib/pacman/local
 	for FILE in $PKG; do
-	pacman -U -d -r $TMPDIR $FILE
+	pacman -U -d --noconfirm -r $TMPDIR $FILE
 	done
 	
 	DESTINATION="$(pwd)/$(basename $1).lzm"
@@ -273,7 +273,7 @@ pkg()
 	pacman -Sw "$1" --noconfirm
 	PKG=$(ls /var/cache/pacman/pkg/$1-[0-9]*.pkg.tar.*z | tail -1)
 	
-	pacman -U -d -r $TMPDIR $PKG
+	pacman -U -d --noconfirm -r $TMPDIR $PKG
 	
 	echo "Creating module ..."
 	
@@ -323,7 +323,7 @@ local()
 	TMPDIR="$(pwd)/pkg2lzm$$"
 	mkdir -p $TMPDIR/var/lib/pacman/local
 	PKG=$(ls $1-[0-9]*.pkg.tar.*z)
-	pacman -U -d -r $TMPDIR $PKG
+	pacman -U -d --noconfirm -r $TMPDIR $PKG
 	
 	echo "Creating module ..."
 

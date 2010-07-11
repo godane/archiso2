@@ -1,13 +1,9 @@
-# Conky sample configuration
+# top_right
 #
-# the list of variables has been removed from this file in favour
-# of keeping the documentation more maintainable.
-# Check http://conky.sf.net for an up-to-date-list.
-
-# Edited by: Wolven      <http://wolvix.org>
+# Author: Wolven      <http://wolvix.org>
 
 # set to yes if you want Conky to be forked in the background
-background no
+background yes
 
 # X font when Xft is disabled, you can pick one with program xfontsel
 #font 5x7
@@ -29,18 +25,10 @@ xftfont  DejaVu Sans Mono:size=8
 xftalpha 0.8
 
 # Print everything to stdout?
-# out_to_console no
-
-# MPD host/port
-# mpd_host localhost
-# mpd_port 6600
-# mpd_password tinker_bell
+out_to_console no
 
 # Print everything to console?
-# out_to_console no
-
-# mail spool
-mail_spool $MAIL
+out_to_console no
 
 # Update interval in seconds
 update_interval 2.0
@@ -53,7 +41,7 @@ total_run_times 0
 own_window yes
 
 # If own_window is yes, you may use type normal, desktop or override
-own_window_type normal
+own_window_type override
 
 # Use pseudo transparency with own_window?
 own_window_transparent yes
@@ -68,10 +56,11 @@ own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
 double_buffer yes
 
 # Minimum size of text area
-#minimum_size 180 5
+minimum_size 180 2
+maximum_width 200
 
 # Draw shades?
-draw_shades yes
+draw_shades no
 
 # Draw outlines?
 draw_outline no
@@ -86,27 +75,27 @@ draw_graph_borders yes
 stippled_borders 8
 
 # border margins
-#border_margin 4
+border_margin 4
 
 # border width
 border_width 1
 
 # Default colors and also border colors
-default_color white
+default_color 2e3436
 default_shade_color black
 default_outline_color white
 
 # Text alignment, other possible values are commented
 #alignment top_left
-#alignment top_right
-alignment bottom_left
+alignment top_right
+#alignment bottom_left
 #alignment bottom_right
 #alignment none
 
 # Gap between borders of screen and text
 # same thing as passing -x at command line
-gap_x 10
-gap_y 46
+gap_x 4
+gap_y 32
 
 # Subtract file system buffers from used memory?
 no_buffers yes
@@ -127,15 +116,7 @@ override_utf8_locale yes
 
 
 # Add spaces to keep things from moving about?  This only affects certain objects.
-use_spacer left
-
-#   mldonkey_hostname     Hostname for mldonkey stuff, defaults to localhost
-#   mldonkey_port         Mldonkey port, 4001 default
-#   mldonkey_login        Mldonkey login, default none
-#   mldonkey_password     Mldonkey password, default none
-
-# boinc (seti) dir
-# seti_dir /opt/seti
+use_spacer rigth
 
 # Allow for the creation of at least this number of port monitors (if 0 or not set, default is 16)
 #min_port_monitors 16
@@ -152,6 +133,15 @@ use_spacer left
 
 # stuff after 'TEXT' will be formatted on screen
 
+# top_right
 TEXT
-${color FFFFCC}CPU: ${color }$cpu% ${color D3D3D3}- ${color FFFFCC}MEM: ${color }$memperc% ${color D3D3D3}- ${color FFFFCC}File System: ${color }${fs_bar 8,64 /} ${color D3D3D3}- ${color FFFFCC}Upload: ${color }${upspeedgraph eth0 8,64 000000 ffffff} ${color D3D3D3}- ${color FFFFCC}Download: ${color }${downspeedgraph eth0 8,64 000000 ffffff}
-${color FFFFCC}Audacious: ${color }${audacious_title 92} 
+RAM $memperc% ${alignr}${membar 8,80}
+${voffset -7}${hr}
+Used: ${alignr}$mem
+Free: ${alignr}$memeasyfree
+
+Command ${alignr}CPU    RAM 
+${voffset -7}${hr}
+${top name 1} $alignr ${top cpu 1} ${top mem 1}
+${top name 2} $alignr ${top cpu 2} ${top mem 2}
+${top name 3} $alignr ${top cpu 3} ${top mem 3}

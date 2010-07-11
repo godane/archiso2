@@ -1,4 +1,5 @@
-kernel26
+xz
+kernel26-zen
 initscripts
 binutils
 bzip2
@@ -64,7 +65,7 @@ madwifi
 madwifi-utils
 squashfs-tools
 aif
-aufs2
+#aufs2
 aufs2-util
 mkinitcpio
 cpio
@@ -81,6 +82,9 @@ dmraid
 openssh
 openvpn
 progsreiserfs
+mtools
+perl-digest-sha1
+perl-digest-md5
 syslinux
 memtest86+
 mc

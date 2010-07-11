@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Simple screen shot script.
+# Author Wolven  <http://wolvix.org>
+# Updated by Godane
+
+if [ ! -d ~/Screenshots ]; then
+    mkdir -p ~/Screenshots
+fi
+
+NAME="screenshot_`date +%F`_`date +%H`-`date +%M`-`date +%S`"
+import -window root ~/Screenshots/$NAME.png 
+
+#eof

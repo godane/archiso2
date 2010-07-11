@@ -1,6 +1,6 @@
 # Development
 base-devel
-kernel26-headers
+kernel26-zen-headers
 git
 subversion
 cvs
