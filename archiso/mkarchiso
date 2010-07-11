@@ -243,6 +243,17 @@ _imgprepare () {
     _mkinitramfs -c "${CPIOCONFIG}" -b "${basedir}" -k "${kernelver}" -g "${iso_dir}/boot/initrd.img"
 }
 
+
+_ungzipped () {
+    for m in ${UNION_MODULES}; do
+        info "Uncompressing .gz files in ${m}"
+        find -H ${modules_dir}/${m}/ -name "*.gz" -exec gunzip -qf {} \; 2>/dev/null
+        if [ -f ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir ]; then
+            sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir
+        fi
+    done
+}
+
 _rmstuff () {
     if [ "${RMSTUFF}" = "y" ]; then
         for m in ${UNION_MODULES}; do
@@ -266,11 +277,6 @@ _rmstuff () {
             info "Removing .pyc files from ${m}"
             RMPYC=$(find ${modules_dir}/${m}/ -name "*.pyc")
             rm -Rf ${RMPYC}
-            info "Uncompressing .gz files in ${m}"
-            find -H ${modules_dir}/${m}/ -name "*.gz" -exec gunzip -qf {} \; 2>/dev/null
-            if [ -f ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir ]; then
-                sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir
-            fi
         done
     fi
 }
@@ -408,6 +414,8 @@ to the iso/ directory.
 
     info "Unmounting union"
     umount -l "${rootimg_dir}"
+
+    _ungzipped
 
     info "Moving stuff"
     _mvstuff
