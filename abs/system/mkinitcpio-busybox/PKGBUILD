@@ -1,0 +1,31 @@
+# $Id: PKGBUILD 67249 2010-02-05 23:09:52Z thomas $
+# Maintainer: Thomas Bächler <thomas@archlinux.org>
+pkgname=mkinitcpio-busybox
+pkgver=1.16.2
+pkgrel=1
+pkgdesc="base initramfs tools"
+arch=('i686' 'x86_64')
+url="http://www.busybox.net/"
+license=('GPL')
+depends=('glibc')
+source=(http://busybox.net/downloads/busybox-${pkgver}.tar.bz2
+        config)
+md5sums=('2ba980f720a5bdce4ec05423519acc35'
+         'aec2fb8b2aaed8678ca872d0e6827070')
+
+build() {
+  cd "${srcdir}/busybox-${pkgver}"
+
+  unset CFLAGS CXXFLAGS
+  if [ ${CARCH} = "x86_64" ]; then
+    sed 's|^CONFIG_EXTRA_CFLAGS=.*|CONFIG_EXTRA_CFLAGS="-march=x86-64 -mtune=generic -Os -pipe -fno-strict-aliasing"|' "${srcdir}/config" > .config
+  else
+    sed 's|^CONFIG_EXTRA_CFLAGS=.*|CONFIG_EXTRA_CFLAGS="-march=i686 -mtune=generic -Os -pipe -fno-strict-aliasing"|' "${srcdir}/config" > .config
+  fi
+  make || return 1
+}
+
+package() {
+  install -D -m755 "${srcdir}/busybox-${pkgver}"/busybox "${pkgdir}/lib/initcpio/busybox"
+}
+# vim:set ts=2 sw=2 et:
