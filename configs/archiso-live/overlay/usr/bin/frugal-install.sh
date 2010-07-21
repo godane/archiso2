@@ -4,8 +4,9 @@
 DEVICE=${1} # ex. /dev/sda1
 DEVICE_NAME=${DEVICE##*/} # ex. sda1
 DEVICE_BASE=${DEVICE_NAME%[0-9]} # ex. sda
+CDNAME=$(cmdline_value cdname)
 GRUB=/boot/grub
-LIVEFOLDER="$(dirname $(find /mnt/live/mnt -name base.lzm ))" # ex. sr0 or tmp or findiso
+LIVEFOLDER="$(dirname $(find /mnt/live/mnt -name packages.list ))" # ex. sr0 or tmp or findiso
 ISO=${2}
 
 if [ "${DEVICE}" = "" ]; then
@@ -48,21 +49,21 @@ set timeout=30
 menuentry "ISO +changes +modpath" {
 search --set -f "/ISO"
 loopback loop "/ISO"
-linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 nonfree=no xdisplay=old xdriver=no changes=DEVICE/changes modpath=modules
+linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes modpath=modules
 initrd (loop)/boot/initrd.img
 }
 
 menuentry "ISO +changes" {
 search --set -f "/ISO"
 loopback loop "/ISO"
-linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 nonfree=no xdisplay=old xdriver=no changes=DEVICE/changes
+linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes
 initrd (loop)/boot/initrd.img
 }
 
 menuentry "ISO failsafe" {
 search --set -f "/ISO"
 loopback loop "/ISO"
-linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay nohd usbdelay=5 nonfree=no xdisplay=old xdriver=vesa
+linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay nohd usbdelay=5
 initrd (loop)/boot/initrd.img
 }
 EOF
@@ -71,10 +72,16 @@ EOF
 
 	fi
 elif [ -d ${LIVEFOLDER} ]; then
+
+	if [ ${CDNAME} != "" ]; then
+		LIVECDNAME=${CDNAME}
+        fi
+
 	cp -af ${LIVEFOLDER} /mnt/${DEVICE_NAME}/${LIVECDNAME}
 	if [ -f /mnt/${DEVICE_NAME}/boot/grub/grub.cfg ]; then
-		mv -f /mnt/${DEVICE_NAME}/boot/grub/grub.cfg /mnt/${DEVICE_NAME}/boot/grub/grub.cfg
+		mv -f /mnt/${DEVICE_NAME}/boot/grub/grub.cfg /mnt/${DEVICE_NAME}/boot/grub/grub.cfg.old
 	fi
+
 		cat <<EOF>>/mnt/${DEVICE_NAME}/boot/grub/grub.cfg
 set default=0
 set timeout=30

@@ -5,7 +5,7 @@ sys::3:root,bin
 adm::4:root,daemon
 tty::5:arch
 disk::6:root,arch
-lp::7:daemon
+lp::7:daemon,dbus,arch
 mem::8:
 kmem::9:
 wheel::10:root,arch
@@ -23,7 +23,7 @@ audio::92:arch
 optical::93:hal,arch
 floppy:x:94:hal,arch
 storage:x:95:hal,arch
-scanner:x:96:
+scanner:x:96:arch
 power:x:98:root,arch
 nobody::99:
 users::100:

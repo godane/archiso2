@@ -5,6 +5,9 @@ mousepad
 xfce4-panel
 orage
 thunar
+thunar-archive-plugin
+thunar-media-tags-plugin
+thunar-volman
 terminal
 xfce-utils
 xfce4-appfinder
