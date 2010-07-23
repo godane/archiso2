@@ -269,7 +269,7 @@ if [ "${HAS_MODULES}" = "y" ]; then
         mkdir -p "${TMPDIR}/${dir}"
         cp "${BASEDIR}${mod}" "${TMPDIR}/${dir}/"
     done
-    /sbin/depmod -b ${TMPDIR} ${KERNELVERSION}
+    depmod -b ${TMPDIR} ${KERNELVERSION}
     add_file "${TMPDIR}/lib/modules/${KERNELVERSION}/modules.dep"     "/lib/modules/${KERNELVERSION}/modules.dep"
     add_file "${TMPDIR}/lib/modules/${KERNELVERSION}/modules.alias"   "/lib/modules/${KERNELVERSION}/modules.alias"
     add_file "${TMPDIR}/lib/modules/${KERNELVERSION}/modules.symbols" "/lib/modules/${KERNELVERSION}/modules.symbols"
@@ -278,7 +278,7 @@ fi
 status=0
 if [ -n "${GENIMG}" ]; then
     echo -n ":: Generating image '${GENIMG}'..."
-    if ! /sbin/gen_init_cpio ${FILELIST} | ${COMPRESSION} -9 > "${GENIMG}"; then
+    if ! gen_init_cpio ${FILELIST} | ${COMPRESSION} -9 > "${GENIMG}"; then
         echo "FAILED"
         status=1
     else
