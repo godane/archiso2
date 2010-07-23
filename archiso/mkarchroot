@@ -19,33 +19,38 @@ APPNAME=$(basename "${0}")
 # usage: usage <exitvalue>
 usage() {
 	echo "usage ${APPNAME} [options] working-dir [package-list | app]"
+	echo '     OS:'
+	echo '       -a         Set OS to archlinux'
+	echo '       -s         Set OS to slackware' 
 	echo ' options:'
 	echo '    -r <app>      Run "app" within the context of the chroot'
-	echo '    -u            Update the chroot via pacman'
 	echo '    -f            Force overwrite of files in the working-dir'
-	echo '    -s            Updated sync database'
+	echo '    -n            Do not copy config files into the chroot'
+	echo "    -c <dir>      Set package cache. Default: /var/cache/pacman/pkg"
+	echo '    -h            This message'
+	echo ' archlinux options:'
 	echo '    -C <file>     Location of a pacman config file'
 	echo '    -M <file>     Location of a makepkg config file'
-	echo '    -n            Do not copy config files into the chroot'
-	echo "    -c <dir>      Set pacman cache. Default: /var/cache/pacman/pkg"
-	echo '    -h            This message'
+	echo '    -d            Updated sync database'
 	exit $1
 }
 
-while getopts 'r:ufsnhC:M:c:' arg; do
+while getopts 'r:fndsaC:M:c:h:' arg; do
 	case "${arg}" in
 		r) RUN="$OPTARG" ;;
-		u) RUN='pacman -Syu' ;;
 		f) FORCE='y' ;;
-		s) SYNC='y' ;;
+		n) NOCOPY='y' ;;
+                d) SYNC='y' ;;
+                s) OS="slackware" ;;
+		a) OS="archlinux" ;;
 		C) pac_conf="$OPTARG" ;;
 		M) makepkg_conf="$OPTARG" ;;
-		n) NOCOPY='y' ;;
 		c) cache_dir="$OPTARG" ;;
 		h|?) usage 0 ;;
 		*) echo "invalid argument '${arg}'"; usage 1 ;;
 	esac
 done
+
 
 if [ "$EUID" != '0' ]; then
 	echo 'error: this script must be run as root.'
@@ -66,29 +71,19 @@ working_dir="$(readlink -f ${1})"
 shift 1
 
 [ "${working_dir}" = '' ] && echo 'error: please specify a working directory' && usage 1
-
-if [ -z "$cache_dir" ]; then
-	cache_conf=${working_dir}/etc/pacman.conf
-	[ ! -f $cache_conf ] && cache_conf=${pac_conf:-/etc/pacman.conf}
-	cache_dir=$((grep -m 1 '^CacheDir' $cache_conf || echo 'CacheDir = /var/cache/pacman/pkg') | sed 's/CacheDir\s*=\s*//')
-	unset cache_conf
-fi
+[ "${OS}" = '' ] && echo 'error: please set the OS' && usage 1
 
 # {{{ functions 
 
 chroot_mount() {
-	[ -e "${working_dir}/sys" ] || mkdir "${working_dir}/sys"
+	[ -e "${working_dir}/sys" ] || mkdir -p "${working_dir}/sys"
 	mount -t sysfs sysfs "${working_dir}/sys"
 
-	[ -e "${working_dir}/proc" ] || mkdir "${working_dir}/proc"
+	[ -e "${working_dir}/proc" ] || mkdir -p "${working_dir}/proc"
 	mount -t proc proc "${working_dir}/proc"
 
-	[ -e "${working_dir}/dev" ] || mkdir "${working_dir}/dev"
+	[ -e "${working_dir}/dev" ] || mkdir -p "${working_dir}/dev"
 	mount -o bind /dev "${working_dir}/dev"
-
-	[ -e "${cache_dir}" ] || mkdir -p "${cache_dir}"
-	[ -e "${working_dir}/${cache_dir}" ] || mkdir -p "${working_dir}/${cache_dir}"
-	mount -o bind "${cache_dir}" "${working_dir}/${cache_dir}"
 
 	trap 'chroot_umount' 0 1 2 15
 }
@@ -102,15 +97,53 @@ chroot_umount () {
 	umount "${working_dir}/proc"
 	umount "${working_dir}/sys"
 	umount "${working_dir}/dev"
-	umount "${working_dir}/${cache_dir}"
+	if [ "${OS}" = "archlinux" ]; then
+		umount ${workdir_dir}/${cache_dir}
+	fi
 }
 # }}}
+
+archlinux_root () {
+	local working_dir=${1}
+
+	database=var/lib/pacman/local
+	mkdir -p "${working_dir}/var/lib/pacman/"
+	mkdir -p "${working_dir}/etc/"
+
+	if [ -z "$cache_dir" ]; then
+		cache_conf=${working_dir}/etc/pacman.conf
+		[ ! -f $cache_conf ] && cache_conf=${pac_conf:-/etc/pacman.conf}
+		cache_dir=$((grep -m 1 '^CacheDir' $cache_conf || echo 'CacheDir = /var/cache/pacman/pkg') | sed 's/CacheDir\s*=\s*//')
+		unset cache_conf
+	fi
+
+	[ -e "${cache_dir}" ] || mkdir -p "${cache_dir}"
+	[ -e "${working_dir}/${cache_dir}" ] || mkdir -p "${working_dir}/${cache_dir}"
+	mount -o bind "${cache_dir}" "${working_dir}/${cache_dir}"
+
+	pacargs='--noconfirm -v --needed' #--noprogressbar -v
+	pacargs="$pacargs --root=${working_dir}"
+	# pacman takes these as relative to the given root
+	pacargs="$pacargs --cachedir=${cache_dir}"
+	if [ "$pac_conf" != "" ]; then
+		pacargs="$pacargs --config=${pac_conf}"
+	fi
+
+	if [ "$pac_conf" != "" -a "$NOCOPY" = "n" ]; then
+		cp ${pac_conf} ${working_dir}/etc/pacman.conf
+	fi
+
+	if [ "$makepkg_conf" != "" -a "$NOCOPY" = "n" ]; then
+		cp ${makepkg_conf} ${working_dir}/etc/makepkg.conf
+	fi
+
+}
 
 umask 0022
 if [ "$RUN" != "" ]; then
 	# run chroot {{{
 	#Sanity check
-	if [ ! -f "${working_dir}/.arch-chroot" ]; then
+	if [ ! -f "${working_dir}/.root-chroot" ]; then
 		echo "error: '${working_dir}' does not appear to be a Arch chroot"
 		echo '       please build the image using mkarchroot'
 		exit 1
@@ -129,45 +162,51 @@ if [ "$RUN" != "" ]; then
 		exit 1
 	fi
 
-	mkdir -p "${working_dir}/var/lib/pacman/"
-	mkdir -p "${working_dir}/etc/"
-
 	chroot_mount
+	
+	if [ "${OS}" = "archlinux" ]; then
+		archlinux_root "${working_dir}"
 
-	pacargs='--noconfirm -v --needed' #--noprogressbar -v
-	pacargs="$pacargs --root=${working_dir}"
-	# pacman takes these as relative to the given root
-	pacargs="$pacargs --cachedir=${cache_dir}"
-	if [ "$pac_conf" != "" ]; then
-		pacargs="$pacargs --config=${pac_conf}"
-	fi
+		if [ $# -ne 0 ]; then
+			op='-S'
+			if [ "$SYNC" = "y" ]; then
+				op="${op}y"
+			fi
+			if [ "$FORCE" = "y" ]; then
+				op="${op}f"
+			fi
+			if ! pacman ${op} ${pacargs} $@; then
+				echo 'error: failed to install all packages'
+				exit 1
+			fi
+		fi
+	elif [ "${OS}" = "slackware" ]; then
 
-	if [ $# -ne 0 ]; then
-		op='-S'
-		if [ "$SYNC" = "y" ]; then
-			op="${op}y"
-		fi
-		if [ "$FORCE" = "y" ]; then
-			op="${op}f"
-		fi
-		if ! pacman ${op} ${pacargs} $@; then
-			echo 'error: failed to install all packages'
+		if [ -z "${cache_dir}" ]; then
+			echo "You need to setup cache folder for building slackware livecd."
 			exit 1
 		fi
+		database=var/log/packages
+		pkg=$@
+		if [ -f "$(find ${working_dir}/var/log/packages/ -name "${pkg}-*[0-9]*" 2>&1 >/dev/null)" ]; then
+			echo "error: this package is installed."
+		else
+			package=$(find ${cache_dir} -name "${pkg}-*[0-9]*.t*z")
+			if [ -f "${package}" ]; then
+				if [ $# -ne 0 ]; then
+					if ! installpkg --root ${working_dir} ${package}; then
+						echo 'error: failed to install all packages'
+						exit 1
+					fi
+				fi
+			fi
+		fi
 	fi
 
-	if [ -d "${working_dir}/var/lib/pacman/local" ]; then
+	if [ -d "${working_dir}/${database}" ]; then
 		if [ -f "${working_dir}/etc/ld.so.conf" ]; then
 			ldconfig -r "${working_dir}"
 		fi
-	fi
-
-	if [ "$pac_conf" != "" -a "$NOCOPY" = "n" ]; then
-		cp ${pac_conf} ${working_dir}/etc/pacman.conf
-	fi
-
-	if [ "$makepkg_conf" != "" -a "$NOCOPY" = "n" ]; then
-		cp ${makepkg_conf} ${working_dir}/etc/makepkg.conf
 	fi
 
 	if [ -e "${working_dir}/etc/locale.gen" ]; then
@@ -175,8 +214,8 @@ if [ "$RUN" != "" ]; then
 	#	chroot "${working_dir}" locale-gen
 	fi
 
-	if [ ! -e "${working_dir}/.arch-chroot" ]; then
-		date +%s > "${working_dir}/.arch-chroot"
+	if [ ! -e "${working_dir}/.root-chroot" ]; then
+		date +%s > "${working_dir}/.root-chroot"
 	fi
 	# }}}
 fi

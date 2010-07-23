@@ -11,11 +11,14 @@ ver=""
 CDNAME="archiso-live"
 RMSTUFF=n
 MVSTUFF=n
+UNGZIP=n
 EXT="sqfs"
 MKOPTION="-b 256k"
 MODULES=""
 modlocale="z.099.locale"
 modmove="z.099.etc"
+OS="archlinux"
+SLACK_CACHE=""
 
 error () { echo -e "\033[1;31;40m!!! \033[1;37;40m$@\033[1;0m"; }
 warn ()  { echo -e "\033[1;33;40m*** \033[1;37;40m$@\033[1;0m"; }
@@ -35,6 +38,8 @@ usage ()
     echo "    -L <label>        Set a label for the disk"
     echo "    -P <publisher>    Set a publisher for the disk"
     echo "    -A <application>  Set an application name for the disk"
+    echo "    -a                Set the OS of livecd your going to be building to archlinux."
+    echo "    -s                Set the OS of livecd your going to be buildinng to slackware."
     echo "    -d                Create default user directory /home/arch"
     echo "    -v                Enable verbose output"
     echo "    -h                This message"
@@ -49,7 +54,7 @@ usage ()
     exit $1
 }
 
-while getopts 'p:C:m:L:P:A:dfvh' arg; do
+while getopts 'p:C:m:L:P:A:asdfvh' arg; do
     case "${arg}" in
         p) PROFILE="${OPTARG}" ;;
         C) PACCONFIG="${OPTARG}" ;;
@@ -57,6 +62,8 @@ while getopts 'p:C:m:L:P:A:dfvh' arg; do
         m) BASE_MODULES="${OPTARG}" ;;
     	P) PUBLISHER="${OPTARG}" ;;
     	A) APPLICATION="${OPTARG}" ;;
+	a) OS="archlinux" ;;
+	s) OS="slackware" ;;
         d) CREATE_DEFAULT="y" ;;
         f) FORCE="y" ;;
         v) QUIET="n" ;;
@@ -107,6 +114,7 @@ esac
 
 [ "x${imgname}" = "x" ] && warn "Image name must be specified" && usage 1
 [ "x${work_dir}" = "x" ] && warn "Please specify a working directory" && usage 1
+[ "x${OS}" = "x" ] && warn "Please specify the OS" && usage 1
 
 rootimg_dir="${work_dir}/root-image" # union folder
 iso_dir="${work_dir}/iso" # iso folder
@@ -134,10 +142,10 @@ _pacman ()
 {
     local ret
     if [ "${QUIET}" = "y" ]; then
-        mkarchroot -C "$PACCONFIG" -f "$rootimg_dir" $* 2>&1 >/dev/null
+        mkarchroot -a -C "$PACCONFIG" -f "$rootimg_dir" $* 2>&1 >/dev/null
         ret=$?
     else
-        mkarchroot -C "$PACCONFIG" -f "$rootimg_dir" $*
+        mkarchroot -a -C "$PACCONFIG" -f "$rootimg_dir" $*
         ret=$?
     fi
 
@@ -167,14 +175,23 @@ _bootfiles () {
     if [ -f ${INSTROOT}/${VMLINUZ} ]; then
         mv -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
     fi
-    cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
-    cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
+    if [ -f ${INSTROOT}/boot/vmlinuz ]; then
+        cp -f ${INSTROOT}/boot/vmlinuz ${iso_dir}/boot/vmlinuz
+    fi
+    if [ -f ${INSTROOT}/boot/memtest86+/memtest.bin ]; then
+        cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
+    fi
+    if [ -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ]; then
+        cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
+    fi
     cp -rf ${PROFILE}/boot-files/* ${iso_dir}/boot/
-    cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/isolinux/
+    if [ -d ${INSTROOT}/usr/lib/syslinux ]; then
+        cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/isolinux/
+    fi
 }
 
 _overlay() {
@@ -316,6 +333,63 @@ _mvstuff () {
     fi
 }
 
+
+archlinux_union () {
+    if [ ! -d "${sync_dir}/var/lib/pacman/sync/core" ]; then
+        mkdir -p ${sync_dir}/var/lib/pacman
+        pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
+        if [ -d ${sync_dir}/var/lib/pacman/local ]; then
+            rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
+        fi
+    fi
+        
+    if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+        #mkarchroot -a -C "$PACCONFIG" -f -u ${rootimg_dir}
+        pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
+    elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+        if [ -e "${PROFILE}/list/${mod}.list" ]; then
+            cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
+                #_pacman "${pkgname}"
+                info "Installing package $pkgname"
+                mkarchroot -a -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname"
+            done
+        fi
+
+        if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
+            cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
+                info "Removing package $pkgname"
+                pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
+            done
+        fi
+    fi
+
+}
+depfile() {
+sed -n '
+    /^PACKAGE NAME:.*/{
+    N;N;N;N
+    s/,/ /g
+    s/^PACKAGE NAME:[ \t]*\(.*\)-[^-]*-[^-]*-[^-]*\.t[glx]z[ \t]*\n.*\nPACKAGE SIZE (compressed):[ \t]*\(.*\)\nPACKAGE SIZE (uncompressed):[ \t]*\(.*\)\nPACKAGE REQUIRED:[ \t]*\(.*\)/\1:\4/p
+    }' ${SLACK_CACHE}/PACKAGES.TXT > /tmp/depfile
+}
+
+slackware_union() {
+    cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
+	#if [ "${OS}" = "zenwalk" ]; then
+	#	DEP_FILE=$(find ${SLACK_CACHE} -size +1c -name "${pkgname}-[0-9]*.dep")
+	#	if [ -f "${DEP_FILE}" ]; then
+	#		for depends in $(cat "${DEP_FILE}" | sed "s|,|\n|g"); do
+	#			echo "${depends}" | while read pkg; do
+	#				mkarchroot -s -c ${SLACK_CACHE} -f ${rootimg_dir} "$pkg"
+	#			done	
+	#		done
+	#	fi
+	#fi
+        info "Installing package $pkgname"
+        mkarchroot -s -c ${SLACK_CACHE} -f ${rootimg_dir} "$pkgname"
+    done
+}
+
 command_create () {
     info "====> Creating working directory: ${work_dir}"
     mkdir -p "${iso_dir}"
@@ -373,49 +447,33 @@ to the iso/ directory.
         mount -t aufs -o remount,mod:${lastbr_dir}=rr+wh aufs ${rootimg_dir}
         lastbr_dir="${modules_dir}/${mod}"
 
-        if [ ! -d "${sync_dir}/var/lib/pacman/sync/core" ]; then
-	    mkdir -p ${sync_dir}/var/lib/pacman
-            pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
-            if [ -d ${sync_dir}/var/lib/pacman/local ]; then
-                rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
-            fi
-        fi
-        
-        if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
-            #mkarchroot -C "$PACCONFIG" -f -u ${rootimg_dir}
-            pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
-        elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
-            if [ -e "${PROFILE}/list/${mod}.list" ]; then
-                cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
-                    #_pacman "${pkgname}"
-                    info "Installing package $pkgname"
-                    mkarchroot -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname"
-                done
-            fi
-
-            if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
-                cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
-                    info "Removing package $pkgname"
-                    pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
-                done
-            fi
+        if [ "${OS}" = "archlinux" ]; then
+            archlinux_union
+	elif [ "${OS}" = "slackware" -o "${OS}" = "zenwalk" ]; then
+            slackware_union
         fi
 
-    # Delete all log files, keeps empty dirs.
-    find "${work_dir}/${mod}/var/log" -type f -delete
+        # Delete all log files, keeps empty dirs.
+        find "${work_dir}/${mod}/var/log" -type f -delete
 
-    # Delete all temporary files and dirs
-    find "${work_dir}/${mod}/var/tmp" -mindepth 1 -delete
+        # Delete all temporary files and dirs
+        find "${work_dir}/${mod}/var/tmp" -mindepth 1 -delete
 
     done
 
     info "Making package list"
-    pacman -Q -r ${rootimg_dir} > ${iso_dir}/packages.list
+    if [ "${OS}" = "archlinux" ]; then
+        pacman -Q -r ${rootimg_dir} > ${iso_dir}/packages.list
+    elif [ "${OS}" = "slackware" -o "${OS}" = "zenwalk" ]; then
+        ls ${rootimg_dir}/var/log/packages/ | sed "s|${rootimg_dir}/var/log/packages/||g" >  ${iso_dir}/packages.list
+    fi
 
     info "Unmounting union"
     umount -l "${rootimg_dir}"
 
-    _ungzipped
+    if [ "${UNGZIP}" = "y" ]; then
+        _ungzipped
+    fi
 
     info "Moving stuff"
     _mvstuff
@@ -424,8 +482,9 @@ to the iso/ directory.
     _rmstuff
 
     info "Cleaning up what we can"
-
-    find "${modules_dir}" -name *.pacnew -name *.pacsave -name *.pacorig -delete
+    if [ "${OS}" = "archlinux" ]; then
+        find "${modules_dir}" -name *.pacnew -name *.pacsave -name *.pacorig -delete
+    fi
 
     info "Removing unionfs .wh. files."
     find ${modules_dir} -type f -name ".wh.*" -exec rm {} \;
@@ -436,8 +495,12 @@ to the iso/ directory.
         find "${INSTROOT}/boot" -name '*.img' -delete
     fi
 
+    if [ "${OS}" = "archlinux" ]; then
+        ARCH_RMDIRS="var/abs var/cache/pacman var/lib/pacman/sync"
+    fi
+
     # delete a lot of unnecessary cache/log files
-    kill_dirs="var/abs var/cache/man var/cache/pacman var/lib/pacman/sync var/log/* var/mail tmp/* initrd"
+    kill_dirs="${ARCH_RMDIRS} var/cache/man var/log/* var/mail tmp/* initrd"
     for x in ${kill_dirs}; do
         if [ -e "${rootimg_dir}/${x}" ]; then
             rm -rf "${rootimg_dir}/${x}"
