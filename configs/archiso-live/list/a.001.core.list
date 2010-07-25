@@ -77,6 +77,8 @@ time
 dnsutils
 dmraid
 inetutils
+perl-error
+libelf
 #live-cd
 #aufs2
 aufs2-util

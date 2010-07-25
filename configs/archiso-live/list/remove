@@ -1,5 +1,8 @@
 #icon-theme.cache
 usr/share/icons/nuoveXT2/icon-theme.cache
+#logs
+var/log/lastlog
+var/log/pacman.log
 #man-pages
 usr/share/info
 #man-pages

@@ -1,8 +1,9 @@
-MODULES="a.007.devel a.008.xfce a.009.e17-svn a.010.xcmd a.011.xlibs a.012.xapps a.013.games"
+MODULES="a.007.devel a.008.icons a.009.xfce a.010.e17-svn a.011.xcmd a.012.xlibs a.013.xapps a.014.games"
 BASE_MODULES="a.001.core a.002.xorg a.003.lxde a.004.firefox a.005.libs a.006.apps"
 ver="-zen"
 MVSTUFF=y
 RMSTUFF=y
+UNGZIP=y
 CDNAME="archiso-live"
 LABEL="Archiso-live"
 PUBLISHER="http://godane.wordpress.com/"

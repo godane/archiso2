@@ -49,21 +49,21 @@ set timeout=30
 menuentry "ISO +changes +modpath" {
 search --set -f "/ISO"
 loopback loop "/ISO"
-linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes modpath=modules
+linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline locale=en_US.UTF-8 keymap=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes modpath=modules
 initrd (loop)/boot/initrd.img
 }
 
 menuentry "ISO +changes" {
 search --set -f "/ISO"
 loopback loop "/ISO"
-linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes
+linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline locale=en_US.UTF-8 keymap=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes
 initrd (loop)/boot/initrd.img
 }
 
 menuentry "ISO failsafe" {
 search --set -f "/ISO"
 loopback loop "/ISO"
-linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline lang=en_US keyb=us session=xfce load=overlay nohd usbdelay=5
+linux (loop)/boot/vmlinuz findiso=/ISO elevator=deadline locale=en_US.UTF-8 keymap=us session=xfce load=overlay nohd usbdelay=5
 initrd (loop)/boot/initrd.img
 }
 EOF
@@ -77,7 +77,8 @@ elif [ -d ${LIVEFOLDER} ]; then
 		LIVECDNAME=${CDNAME}
         fi
 
-	cp -af ${LIVEFOLDER} /mnt/${DEVICE_NAME}/${LIVECDNAME}
+	mkdir -p /mnt/${DEVICE_NAME}/${LIVECDNAME}
+	cp -af ${LIVEFOLDER}/* /mnt/${DEVICE_NAME}/${LIVECDNAME}
 	if [ -f /mnt/${DEVICE_NAME}/boot/grub/grub.cfg ]; then
 		mv -f /mnt/${DEVICE_NAME}/boot/grub/grub.cfg /mnt/${DEVICE_NAME}/boot/grub/grub.cfg.old
 	fi
@@ -86,17 +87,17 @@ elif [ -d ${LIVEFOLDER} ]; then
 set default=0
 set timeout=30
 menuentry "LIVECDNAME +changes +modpath" {
-linux /LIVECDNAME/boot/vmlinuz from=DEVICE/LIVECDNAME elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 nonfree=no xdisplay=old xdriver=no changes=DEVICE/changes modpath=modules
+linux /LIVECDNAME/boot/vmlinuz from=DEVICE/LIVECDNAME elevator=deadline locale=en_US.UTF-8 keymap=us session=xfce load=overlay usbdelay=5 changes=DEVICE/changes modpath=modules
 initrd /LIVECDNAME/boot/initrd.img
 }
 
 menuentry "LIVECDNAME +changes" {
-linux /LIVECDNAME/boot/vmlinuz from=DEVICE/LIVECDNAME elevator=deadline lang=en_US keyb=us session=xfce load=overlay usbdelay=5 nonfree=no xdisplay=old xdriver=no changes=DEVICE/changes
+linux /LIVECDNAME/boot/vmlinuz from=DEVICE/LIVECDNAME elevator=deadline locale=en_US.UTF-8 keymap=us session=xfce load=overlay changes=DEVICE/changes
 initrd /LIVECDNAME/boot/initrd.img
 }
 
 menuentry "LIVECDNAME failsafe" {
-linux /LIVECDNAME/boot/vmlinuz from=DEVICE/LIVECDNAME elevator=deadline lang=en_US keyb=us session=xfce load=overlay nohd usbdelay=5 nonfree=no xdisplay=old xdriver=vesa
+linux /LIVECDNAME/boot/vmlinuz from=DEVICE/LIVECDNAME elevator=deadline locale=en_US.UTF-8 keymap=us session=xfce load=overlay nohd usbdelay=5
 initrd /LIVECDNAME/boot/initrd.img
 }
 EOF
