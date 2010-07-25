@@ -3,7 +3,7 @@
 # Contributor: Hugo Doria <hugo@archlinux.org>
 
 pkgname=mplayer
-pkgver=31630
+pkgver=31774
 pkgrel=1live
 pkgdesc="A movie player for linux"
 arch=('i686' 'x86_64')
@@ -15,7 +15,7 @@ url="http://www.mplayerhq.hu/"
 makedepends=('unzip' 'mesa' 'live-media>=2010.01.13')
 backup=('etc/mplayer/codecs.conf' 'etc/mplayer/input.conf')
 source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz mplayer.desktop mplayer.png)
-md5sums=('b351d85bf5c621015be68bfa70e63cf4'
+md5sums=('3ebcfb6f3fdcaf884877dcb41f20514c'
          'c0d6ef795cf6de48e3b87ff7c23f0319'
          'd00874ccc644b7f43d6ef1c942fcef28')
 
@@ -38,7 +38,6 @@ build() {
       --disable-esd \
       --disable-mga \
       --disable-smb \
-      --disable-ftp \
       --disable-jack \
       --disable-pulse \
       --enable-xvmc \
