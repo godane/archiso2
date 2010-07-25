@@ -11,6 +11,7 @@ ver=""
 CDNAME="archiso-live"
 RMSTUFF=n
 MVSTUFF=n
+UNGZIP=n
 EXT="sqfs"
 MKOPTION="-b 256k"
 MODULES=""
@@ -167,14 +168,23 @@ _bootfiles () {
     if [ -f ${INSTROOT}/${VMLINUZ} ]; then
         mv -f ${INSTROOT}/${VMLINUZ} ${iso_dir}/boot/vmlinuz
     fi
-    cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
-    cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
+    if [ -f ${INSTROOT}/boot/vmlinuz ]; then
+        cp -f ${INSTROOT}/boot/vmlinuz ${iso_dir}/boot/vmlinuz
+    fi
+    if [ -f ${INSTROOT}/boot/memtest86+/memtest.bin ]; then
+        cp -f ${INSTROOT}/boot/memtest86+/memtest.bin ${iso_dir}/boot/memtest
+    fi
+    if [ -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ]; then
+        cp -f ${INSTROOT}/usr/share/licenses/common/GPL2/license.txt ${iso_dir}/boot/memtest.COPYING
+    fi
     cp -rf ${PROFILE}/boot-files/* ${iso_dir}/boot/
-    cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
-    cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/isolinux/
+    if [ -d ${INSTROOT}/usr/lib/syslinux ]; then
+        cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/isolinux/
+    fi
 }
 
 _overlay() {
@@ -316,6 +326,36 @@ _mvstuff () {
     fi
 }
 
+archlinux_union () {
+    if [ ! -d "${sync_dir}/var/lib/pacman/sync/core" ]; then
+        mkdir -p ${sync_dir}/var/lib/pacman
+        pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
+        if [ -d ${sync_dir}/var/lib/pacman/local ]; then
+            rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
+        fi
+    fi
+
+    if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+        #mkarchroot -C "$PACCONFIG" -f -u ${rootimg_dir}
+        pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
+    elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
+        if [ -e "${PROFILE}/list/${mod}.list" ]; then
+            cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
+                #_pacman "${pkgname}"
+                info "Installing package $pkgname"
+                mkarchroot -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname"
+            done
+        fi
+
+        if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
+            cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
+                info "Removing package $pkgname"
+                pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
+            done
+        fi
+    fi
+}
+
 command_create () {
     info "====> Creating working directory: ${work_dir}"
     mkdir -p "${iso_dir}"
@@ -373,39 +413,13 @@ to the iso/ directory.
         mount -t aufs -o remount,mod:${lastbr_dir}=rr+wh aufs ${rootimg_dir}
         lastbr_dir="${modules_dir}/${mod}"
 
-        if [ ! -d "${sync_dir}/var/lib/pacman/sync/core" ]; then
-	    mkdir -p ${sync_dir}/var/lib/pacman
-            pacman -Sy --noprogressbar --noconfirm --config "${PACCONFIG}" -fr "${sync_dir}"
-            if [ -d ${sync_dir}/var/lib/pacman/local ]; then
-                rmdir --ignore-fail-on-non-empty ${sync_dir}/var/lib/pacman/local
-            fi
-        fi
-        
-        if [ -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
-            #mkarchroot -C "$PACCONFIG" -f -u ${rootimg_dir}
-            pacman -Su -f --needed --noconfirm --config "${PACCONFIG}" -fr "${rootimg_dir}"
-        elif [ ! -d ${modules_dir}/${mod}/var/lib/pacman/local ]; then
-            if [ -e "${PROFILE}/list/${mod}.list" ]; then
-                cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
-                    #_pacman "${pkgname}"
-                    info "Installing package $pkgname"
-                    mkarchroot -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname"
-                done
-            fi
+        archlinux_union
 
-            if [ -e "${PROFILE}/list/${mod}.removelist" ]; then
-                cat "${PROFILE}/list/${mod}.removelist" | grep -v "^#" | while read pkgname; do
-                    info "Removing package $pkgname"
-                    pacman -R -d -n --noprogressbar --needed --noconfirm --config "$PACCONFIG" -r "$rootimg_dir" $pkgname
-                done
-            fi
-        fi
+        # Delete all log files, keeps empty dirs.
+        #find "${work_dir}/${mod}/var/log" -type f -delete
 
-    # Delete all log files, keeps empty dirs.
-    find "${work_dir}/${mod}/var/log" -type f -delete
-
-    # Delete all temporary files and dirs
-    find "${work_dir}/${mod}/var/tmp" -mindepth 1 -delete
+        # Delete all temporary files and dirs
+        #find "${work_dir}/${mod}/var/tmp" -mindepth 1 -delete
 
     done
 
@@ -415,7 +429,9 @@ to the iso/ directory.
     info "Unmounting union"
     umount -l "${rootimg_dir}"
 
-    _ungzipped
+    if [ "${UNGZIP}" = "y" ]; then
+        _ungzipped
+    fi
 
     info "Moving stuff"
     _mvstuff
@@ -435,14 +451,6 @@ to the iso/ directory.
         # remove the initcpio images that were generated for the host system
         find "${INSTROOT}/boot" -name '*.img' -delete
     fi
-
-    # delete a lot of unnecessary cache/log files
-    kill_dirs="var/abs var/cache/man var/cache/pacman var/lib/pacman/sync var/log/* var/mail tmp/* initrd"
-    for x in ${kill_dirs}; do
-        if [ -e "${rootimg_dir}/${x}" ]; then
-            rm -rf "${rootimg_dir}/${x}"
-        fi
-    done 
 
 }
 
