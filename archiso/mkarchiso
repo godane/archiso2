@@ -505,6 +505,13 @@ _imgcommon () {
             fi
         done
     fi
+
+    if [ -e "${PROFILE}/list/pkg.modules" ]; then
+        mkdir -p ${isomodules_dir}/packages
+        cat "${PROFILE}/list/pkg.modules" | grep -v "^#" | while read pkgname; do
+             pkg2lzm ${pkgname} ${isomodules_dir}/packages
+        done
+    fi
     
     if [ "${MVSTUFF}" = "y" ]; then
        if [ -d "${modules_dir}/${modlocale}" ]; then

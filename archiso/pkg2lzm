@@ -1,0 +1,47 @@
+#!/bin/bash
+
+pkg()
+{
+	TMPDIR="/tmp/pkg2lzm$$"
+	mkdir -p $TMPDIR/var/lib/pacman/local
+	#sync
+
+	pacman -Sw "$1" --noconfirm
+	PKG=$(find /var/cache/pacman/pkg -name "$1-[0-9]*.pkg.tar.*z" | sort | tail -1)
+        if [ "${PKG}" != "" ]; then
+            pacman -U -d --noconfirm -r $TMPDIR $PKG
+        else
+            echo "package doesn't exist."
+        fi
+	
+	echo "Creating module ..."
+	
+	PKGNAME=${PKG##*/}
+        DESTINATION="${2}/${PKGNAME%.pkg.tar.*z}.lzm"
+        if [ ! -f "${DESTINATION}" ]; then
+	    mksquashfs $TMPDIR $DESTINATION -b 256kB > /tmp/mksquashfs.log
+        else
+            echo "module exists. continuring."
+        fi
+	
+	if [ $? -ne 0 ]; then 
+	echo "Error building module"
+	exit
+	fi
+
+        rm -R -f $TMPDIR
+	echo $DESTINATION
+	chmod 0755 $DESTINATION
+}
+
+pkgname="${1}"
+path="${2}"
+if [ "${pkgname}" != "" ]; then
+    if [ -d "${path}" ]; then
+        pkg "${pkgname}" "${path}"
+    elif [ ! -d "${path}" ]; then
+        pkg "${pkgname}" "$(pwd)"
+    fi
+else
+    echo "${pkgname} not found."
+fi
