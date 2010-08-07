@@ -38,5 +38,6 @@ rtkit:x:999:
 pulse:x:130:
 pulse-access:x:131:
 pulse-rt:x:132:
+wireshark:x:150:arch
 tor:x:43:
 privoxy:x:42:

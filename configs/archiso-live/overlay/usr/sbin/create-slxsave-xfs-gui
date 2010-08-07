@@ -1,0 +1,119 @@
+#!/bin/sh
+#
+# Create a slxsave.xfs file for persistent changes in the live
+# environment.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU  General Public License as published by
+# the Free Software Foundation; either version 3 of the License or (at
+# your option) any later version.
+# Please take a look at http://www.gnu.org/copyleft/gpl.htm
+#
+# Written by: Cyrille Pontvieux <jrd~at~enialis~dot~net>
+# Date: 2010/01/10
+# Version: 0.1
+# Modified by: Pierrick Le Brun <akuna~at~free~dot~fr>
+# Date: 2010/01/31
+# Version: 0.2
+
+# Gettext internationalization
+export TEXTDOMAIN="create-slxsave-xfs"
+export TEXTDOMAINDIR="/usr/share/locale"
+. gettext.sh
+
+CLIPRGM=/usr/sbin/create-slxsave-xfs
+RWMP=/tmp/slxsave-rwmountpoints
+
+if [ ! $DISPLAY ]; then
+	echo -e "`eval_gettext "ERROR: $TEXTDOMAIN must be executed within a running X session.\n"`"
+	exit 1
+fi
+
+if [ "$UID" != "0" ]; then
+	echo "`eval_gettext 'ERROR: You need to be root to run this'`"
+	exit 1
+fi
+
+if [ ! `which zenity` ]; then
+	echo "`eval_gettext 'ERROR: zenity must be installed and in your PATH to run this'`"
+	exit 1
+fi
+
+if [ ! `which mkfs.xfs` ]; then
+	echo "`eval_gettext 'ERROR: xfsprogs must be installed to run this'`"
+	exit 1
+fi
+
+# find possible writable partitions and free size in megabytes
+cat /dev/null > $RWMP
+mount|egrep '^/.*\(rw(,[^,)]*)*\)$'|grep -v '/mnt/live'|cut -d' ' -f3|xargs -i@ bash -c "echo \$1 \$(LANG= df -m|grep \" \$1\$\"|head -n1|awk '{print \$4}') >> $RWMP" -- @
+
+zenity --info \
+ --title "`eval_gettext 'Persistent changes'`" \
+ --window-icon /usr/share/icons/hicolor/128x128/apps/create-slxsave-xfs.png \
+ --text "`eval_gettext 'If you wish, you can save any of your work or modification performed while in a LiveCD session.\n\nTo do this however, you must first mount usb or a hdd partition with "mount /mnt/sdxx" and then create a special "persistent file" which will have a pre-decided fixed-size and will be formatted as a linux file system.\n\nOnce this file is created, simply reboot the LiveCD for your changes to become persistent from then on.'`"
+
+MOUNTPOINT=$(zenity \
+  --title "`eval_gettext 'Mount point selection'`" \
+  --window-icon /usr/share/icons/hicolor/128x128/apps/create-slxsave-xfs.png \
+  --list \
+  --text "`eval_gettext 'Choose the mountpoint (must be pre-mounted) where to save the persistent file:'`" \
+  --column "`eval_gettext 'Mount point'`" \
+  --column "`eval_gettext 'Size (in MB)'`" \
+  $(cat $RWMP))
+
+if [ -z "$MOUNTPOINT" ]; then
+  rm -f $RWMP
+  exit 1
+fi
+
+MAXSIZE=$(grep $MOUNTPOINT $RWMP|cut -d' ' -f2)
+DEFSIZE=$((MAXSIZE - 250)) # so there is still 250 MB remaining on the partition
+if [ $DEFSIZE -gt 500 ]; then # 500 MB max for default size
+  DEFSIZE=500
+fi
+export MOUNTPOINT MAXSIZE
+SIZE=$(zenity \
+  --title "`eval_gettext 'Size selection'`" \
+  --window-icon /usr/share/icons/hicolor/128x128/apps/create-slxsave-xfs.png \
+  --entry \
+  --text "`eval_gettext 'Choose the size in megabytes (maximum $MAXSIZE) for persistent file on $MOUNTPOINT:'`" \
+  --entry-text $DEFSIZE)
+export SIZE
+if [ -z "$SIZE" ]; then
+  rm -f $RWMP
+  exit 1
+elif [ $SIZE -gt $MAXSIZE ]; then
+  rm -f $RWMP
+  zenity \
+    --title "`eval_gettext 'Error'`" \
+    --window-icon /usr/share/icons/hicolor/128x128/apps/create-slxsave-xfs.png \
+    --error \
+    --text "`eval_gettext 'The chosen size is too big ($SIZE > $MAXSIZE)'`"
+  exit 1
+fi
+
+cd $MOUNTPOINT
+
+(yes | zenity --progress --pulsate --auto-close --auto-kill) &
+$CLIPRGM $SIZE
+ret=$?
+killall yes
+
+if [ $ret -eq 0 ]; then
+  rm -f $RWMP
+  zenity \
+    --title "$TEXTDOMAIN" \
+    --window-icon /usr/share/icons/hicolor/128x128/apps/create-slxsave-xfs.png \
+    --info \
+    --text "`eval_gettext 'slxsave.xfs ($SIZE MB) correctly created in $MOUNTPOINT'`"
+  exit 0
+else
+  rm -f $RWMP
+  zenity \
+    --title "`eval_gettext 'Error'`" \
+    --window-icon /usr/share/icons/hicolor/128x128/apps/create-slxsave-xfs.png \
+    --error \
+    --text "`eval_gettext 'slxsave.xfs ($SIZE MB) cannot be created in $MOUNTPOINT'`"
+  exit 1
+fi

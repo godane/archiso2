@@ -83,10 +83,20 @@ do_locale_gen ()
     stat_done
 }
 
+fix_framebuffer ()
+{
+# make sure the terminal is fully usable even with framebuffer
+if [ -e /dev/fb0 ]; then
+   for i in $(seq 1 30); do echo; done
+   /usr/bin/reset
+fi
+}
+
 case "$1" in
   start)
     do_locale_gen
     sound
+    fix_framebuffer
     ;;
 esac
 exit 0

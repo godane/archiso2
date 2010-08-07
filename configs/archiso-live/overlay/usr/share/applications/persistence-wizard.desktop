@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=PersistenceWizard
+Comment=Create a slxsave.xfs file in order to persist changes in the live env.
+Exec=gksu /usr/sbin/create-slxsave-xfs-gui
+Icon=create-slxsave-xfs
+Terminal=false
+Type=Application
+Categories=System;Application;
+StartupNotify=true
+Encoding=UTF-8
+NoDisplay=false
+NotShowIn=KDE

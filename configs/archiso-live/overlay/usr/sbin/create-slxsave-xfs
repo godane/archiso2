@@ -1,0 +1,23 @@
+#!/bin/sh
+if [ -z "$1" ]; then
+  echo "create-slxsave-xfs SIZE_IN_MEGABYTES"
+  echo "  Will create a slxsave.xfs file with the"
+  echo "  Corresponding size (in MB)."
+  echo "  Copy this file to the root directory of your USB key."
+  echo ""
+  echo "Copyright Cyrille Pontvieux - jrd@enialis.net"
+  echo "Released under GPL v3 or (at your option, any later version)"
+  exit 1
+fi
+SIZE=$1
+FREE=$('df' -k .|tail -n1|awk '{print $4}')
+AFTER=$(( $FREE - 1024 * $SIZE ))
+if [ $AFTER -gt 0 ]; then
+  dd if=/dev/zero of=slxsave.xfs bs=1M count=$SIZE
+  mkfs.xfs -f slxsave.xfs
+  echo ""
+  echo "slxsave.xfs is ready."
+else
+  echo "Not enough free space left for creating slxsave.xfs in the current directory."
+  exit 1
+fi
