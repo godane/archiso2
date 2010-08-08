@@ -1,6 +1,5 @@
 base-devel
-#kernel26-headers
-kernel26-zen-headers
+kernel26-headers
 linux-api-headers
 doxygen
 ccache

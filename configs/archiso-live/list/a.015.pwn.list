@@ -23,6 +23,8 @@ dcfldd
 gdb
 ddrescue
 sleuthkit
+extundelete
+extgrep
 gnu-netcat
 nemesis
 net-snmp

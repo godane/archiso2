@@ -54,6 +54,7 @@ cups
 tint2
 fbpanel
 xlockmore
+zenity
 #games-deps
 sdl_perl
 sdl_pango

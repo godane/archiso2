@@ -23,8 +23,11 @@ gnome-mplayer
 gecko-mediaplayer
 gnome-ppp
 pan
+chmsee
 #deps
 lm_sensors
 libunique
 libexif
 taglib
+gnome-menus
+vdpau-video

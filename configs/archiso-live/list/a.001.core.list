@@ -2,7 +2,7 @@
 tzdata
 -d glibc
 xz
-kernel26-zen
+kernel26
 initscripts
 licenses
 pacman
@@ -79,8 +79,10 @@ dmraid
 inetutils
 perl-error
 libelf
+arch-backup
+sharutils
 #live-cd
-#aufs2
+aufs2
 aufs2-util
 squashfs-tools
 syslinux
@@ -95,8 +97,8 @@ ndiswrapper
 ndiswrapper-utils
 madwifi
 madwifi-utils
-tiacx
-tiacx-firmware
+#tiacx
+#tiacx-firmware
 virtualbox-modules
 virtualbox-ose-additions-modules
 intel-536ep
