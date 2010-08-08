@@ -1,0 +1,61 @@
+# $Id: PKGBUILD 80421 2010-05-17 08:11:17Z tpowa $
+# Originally by kleptophobiac <kleptophobiac@gmail.com>
+# Modified by James Rayner for the repositories <iphitus@gmail.com>
+
+_kernver=2.6.35-ARCH
+
+pkgbase=madwifi-ng
+pkgname=('madwifi' 'madwifi-utils')
+pkgver=0.9.4.4133
+pkgrel=1live
+pkgdesc="Madwifi drivers for Atheros wireless chipsets. For stock arch 2.6 kernel"
+arch=(i686 x86_64)
+license=('GPL')
+url="http://madwifi-project.org"
+makedepends=('kernel26-headers>=2.6.35' 'kernel26-headers<2.6.36' 'sharutils' 'wireless_tools')
+# subversion source: svn checkout http:/madwifi-project.org/svn/madwifi/trunk madwifi
+source=(ftp://ftp.archlinux.org/other/madwifi/madwifi-${pkgver}.tar.bz2
+	#http://downloads.sourceforge.net/madwifi/madwifi-${pkgver}.tar.gz
+	)
+
+build() {
+  /bin/true
+}
+
+package_madwifi() {
+  depends=('madwifi-utils' 'kernel26>=2.6.35' 'kernel26<2.6.36')
+  install=madwifi-ng.install
+  [ "${CARCH}" = "i686" ] && export ARCH=i386
+
+  #cd $startdir/src/$pkgname-$pkgver
+  cd $startdir/src/$pkgname
+  sed -i -e 's/-Werror//g' Makefile.inc
+  make KERNELPATH=/lib/modules/$_kernver/build KERNELRELEASE=$_kernver modules || return 1
+  make KERNELPATH=/lib/modules/$_kernver/build KERNELRELEASE=$_kernver modules \
+       DESTDIR=$pkgdir KERNELRELEASE=$_kernver install-modules
+  sed -i -e "s/KERNEL_VERSION='.*'/KERNEL_VERSION='${_kernver}'/" $startdir/madwifi-ng.install
+  # install to wireless kernel directory
+  mkdir -p $pkgdir/lib/modules/$_kernver/kernel/drivers/net/wireless/madwifi
+  mv $pkgdir/lib/modules/$_kernver/net/* $pkgdir/lib/modules/$_kernver/kernel/drivers/net/wireless/madwifi
+  rm -r $pkgdir/lib/modules/$_kernver/net/
+}
+
+package_madwifi-utils() {
+  depends=('wireless_tools')
+  provides=("madwifi-ng-utils")
+  conflicts=("madwifi-ng-utils")
+  replaces=("madwifi-ng-utils")
+  pkgdesc="Userspace tools of madwifi drivers for Atheros wireless chipsets."
+
+  [ "${CARCH}" == "i686" ] && export ARCH=i386
+
+  export KERNELPATH=/lib/modules/${_kernver}/build
+  #cd $srcdir/madwifi-$pkgver
+  cd $srcdir/madwifi
+  make tools|| return 1
+  make DESTDIR=$pkgdir \
+       BINDIR=/usr/bin \
+       MANDIR=/usr/share/man \
+       install-tools
+}
+md5sums=('ca3c3504d000e7b3d7063af46271c932')
