@@ -324,7 +324,7 @@ fs_options()
       fi
    fi
 
-   if [ "$1" = "iso9660" ]; then
+   if [ "$1" = "iso9660" -o "$1" = "iso9660,udf" ]; then
       echo -n ",ro"
       if [ "$IOCHARSET" ]; then
          echo ",iocharset=$IOCHARSET"
@@ -1083,7 +1083,7 @@ fstab_update()
    list_cdrom_devices | while read DEVICE; do
       MNT=$(device_mountdir $DEVICE)
       FS=$(device_filesystem $DEVICE)
-      if [ "$FS" = "" ]; then FS=iso9660; fi
+      if [ "$FS" = "" ]; then FS=iso9660,udf; fi
       mkdir -p "$1/$MNT"
       fstab_add_line $FSTABTMP $DEVICE $MNT $FS $(fs_options $FS fstab)
    done
