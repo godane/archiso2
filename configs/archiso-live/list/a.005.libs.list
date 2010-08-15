@@ -25,6 +25,13 @@ gnome-ppp
 pan
 chmsee
 #deps
+portaudio
+libassuan
+libidn
+libksba
+libnids
+librpcsecgss
+libtorrent
 lm_sensors
 libunique
 libexif

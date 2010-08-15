@@ -1,6 +1,5 @@
 base-devel
 kernel26-headers
-linux-api-headers
 doxygen
 ccache
 cmake

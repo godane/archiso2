@@ -1,6 +1,4 @@
 #base
-tzdata
--d glibc
 xz
 kernel26
 initscripts
@@ -28,6 +26,7 @@ grub2
 less
 iputils
 rp-pppoe
+pciutils
 pcmciautils
 lvm2
 dcron
