@@ -118,6 +118,7 @@ lastbr_dir="${work_dir}/empty"
 INSTROOT="${modules_dir}/$(basename ${ROOT_MOD} .list)"
 sync_dir="${work_dir}/empty"
 sgn_file="${iso_dir}/${CDNAME}/livecd.sgn"
+buildlog="${work_dir}/log"
 
 if [ "${MODULES}" != "" ]; then
     UNION_MODULES="${BASE_MODULES} ${MODULES}"
@@ -352,7 +353,7 @@ archlinux_union () {
             cat "${PROFILE}/list/${mod}.list" | grep -v "^#" | while read pkgname; do
                 #_pacman "${pkgname}"
                 info "Installing package $pkgname"
-                mkarchroot -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname"
+                mkarchroot -C "$PACCONFIG" -f ${rootimg_dir} "$pkgname" | tee -a ${buildlog}/${mod}-current.log
             done
         fi
 
@@ -373,6 +374,7 @@ command_create () {
     mkdir -p ${iso_dir}/${CDNAME}/{base,modules,optional,rootcopy,tmp}
     mkdir -p "${modules_dir}"
     mkdir -p "${lastbr_dir}"
+    mkdir -p "${buildlog}"
     touch ${sgn_file}
 
     echo "README for this archiso created directory
