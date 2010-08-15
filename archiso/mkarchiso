@@ -161,7 +161,7 @@ _kversion ()
 }
 
 _bootfiles () {
-    mkdir -p ${iso_dir}/boot/isolinux
+    mkdir -p ${iso_dir}/boot/syslinux
     if [ -f ${INSTROOT}/${MAP26} ]; then
         mv -f ${INSTROOT}/${MAP26} ${iso_dir}/${MAP26}
     fi
@@ -179,11 +179,20 @@ _bootfiles () {
     fi
     cp -rf ${PROFILE}/boot-files/* ${iso_dir}/boot/
     if [ -d ${INSTROOT}/usr/lib/syslinux ]; then
-        cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/isolinux/
-        cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/isolinux/
-        cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/isolinux/
-        cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/isolinux/
-        cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/isolinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/*.c32 ${iso_dir}/boot/syslinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/isolinux.bin ${iso_dir}/boot/syslinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/memdisk ${iso_dir}/boot/syslinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/pxelinux.0 ${iso_dir}/boot/syslinux/
+        cp -f ${INSTROOT}/usr/lib/syslinux/gpxelinux.0 ${iso_dir}/boot/syslinux/
+    fi
+
+    mkdir -p ${iso_dir}/boot/syslinux/hdt/
+    if [ -f ${INSTROOT}/usr/share/hwdata/pci.ids ]; then
+        cat ${INSTROOT}/usr/share/hwdata/pci.ids | gzip -9 > ${iso_dir}/boot/syslinux/hdt/pciids.gz
+    fi
+
+    if [ -f ${INSTROOT}/lib/modules/$(_kversion)/modules.alias ]; then
+        cat ${INSTROOT}/lib/modules/$(_kversion)/modules.alias | gzip -9 > ${iso_dir}/boot/syslinux/hdt/modalias.gz
     fi
 }
 
@@ -547,8 +556,8 @@ _imgcommon () {
         fi
     fi
 
-    if ! sed "s|cdname=[^ ]*|cdname=${CDNAME}|" -i ${iso_dir}/boot/isolinux/isolinux.cfg; then
-        error "Error: ${iso_dir}/boot/isolinux/isolinux.cfg, doesn't exist.aborting."
+    if ! sed "s|cdname=[^ ]*|cdname=${CDNAME}|" -i ${iso_dir}/boot/syslinux/syslinux.cfg; then
+        error "Error: ${iso_dir}/boot/syslinux/syslinux.cfg, doesn't exist.aborting."
         exit 1
     fi
 }
@@ -565,7 +574,7 @@ command_iso () {
     qflag=""
     [ "${QUIET}" = "y" ] && qflag="-quiet"
     mkisofs ${qflag} -r -l \
-        -b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat \
+        -b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat \
         -uid 0 -gid 0 \
         -udf -allow-limited-size -iso-level 3 \
         -input-charset utf-8 -p "prepared by mkarchiso" \
