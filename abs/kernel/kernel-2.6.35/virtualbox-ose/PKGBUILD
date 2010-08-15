@@ -111,7 +111,7 @@ package_virtualbox-ose() {
 package_virtualbox-modules(){
     pkgdesc="Kernel modules for VirtualBox"
     license=('GPL')
-    depends=('kernel26=2.6.35' 'kernel26<2.6.36')
+    depends=('kernel26>=2.6.35' 'kernel26<2.6.36')
     install=virtualbox-modules.install
     source "$srcdir/VirtualBox-${pkgver}_OSE/env.sh"
 
