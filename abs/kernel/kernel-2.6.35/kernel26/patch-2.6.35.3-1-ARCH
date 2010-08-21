@@ -1,6 +1,6 @@
 diff -Nur linux-2.6.35/arch/arm/include/asm/tlbflush.h linux-2.6.35-ARCH/arch/arm/include/asm/tlbflush.h
 --- linux-2.6.35/arch/arm/include/asm/tlbflush.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/arm/include/asm/tlbflush.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/arm/include/asm/tlbflush.h	2010-08-20 21:24:47.000000000 +0000
 @@ -378,7 +378,11 @@
  	if (tlb_flag(TLB_V6_I_ASID))
  		asm("mcr p15, 0, %0, c8, c5, 2" : : "r" (asid) : "cc");
@@ -27,7 +27,7 @@ diff -Nur linux-2.6.35/arch/arm/include/asm/tlbflush.h linux-2.6.35-ARCH/arch/ar
  		/* flush the branch target cache */
 diff -Nur linux-2.6.35/arch/arm/Kconfig linux-2.6.35-ARCH/arch/arm/Kconfig
 --- linux-2.6.35/arch/arm/Kconfig	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/arm/Kconfig	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/arm/Kconfig	2010-08-20 21:24:47.000000000 +0000
 @@ -1027,6 +1027,18 @@
  	   is not correctly implemented in PL310 as clean lines are not
  	   invalidated as a result of these operations. Note that this errata
@@ -49,7 +49,7 @@ diff -Nur linux-2.6.35/arch/arm/Kconfig linux-2.6.35-ARCH/arch/arm/Kconfig
  source "arch/arm/common/Kconfig"
 diff -Nur linux-2.6.35/arch/arm/mach-pxa/cm-x300.c linux-2.6.35-ARCH/arch/arm/mach-pxa/cm-x300.c
 --- linux-2.6.35/arch/arm/mach-pxa/cm-x300.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/arm/mach-pxa/cm-x300.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/arm/mach-pxa/cm-x300.c	2010-08-20 21:24:47.000000000 +0000
 @@ -745,9 +745,10 @@
  {
  	cm_x300_init_mfp();
@@ -64,7 +64,7 @@ diff -Nur linux-2.6.35/arch/arm/mach-pxa/cm-x300.c linux-2.6.35-ARCH/arch/arm/ma
  	cm_x300_init_dm9000();
 diff -Nur linux-2.6.35/arch/arm/plat-mxc/gpio.c linux-2.6.35-ARCH/arch/arm/plat-mxc/gpio.c
 --- linux-2.6.35/arch/arm/plat-mxc/gpio.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/arm/plat-mxc/gpio.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/arm/plat-mxc/gpio.c	2010-08-20 21:24:47.000000000 +0000
 @@ -214,13 +214,16 @@
  	struct mxc_gpio_port *port =
  		container_of(chip, struct mxc_gpio_port, chip);
@@ -106,7 +106,7 @@ diff -Nur linux-2.6.35/arch/arm/plat-mxc/gpio.c linux-2.6.35-ARCH/arch/arm/plat-
  
 diff -Nur linux-2.6.35/arch/arm/plat-mxc/include/mach/gpio.h linux-2.6.35-ARCH/arch/arm/plat-mxc/include/mach/gpio.h
 --- linux-2.6.35/arch/arm/plat-mxc/include/mach/gpio.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/arm/plat-mxc/include/mach/gpio.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/arm/plat-mxc/include/mach/gpio.h	2010-08-20 21:24:47.000000000 +0000
 @@ -19,6 +19,7 @@
  #ifndef __ASM_ARCH_MXC_GPIO_H__
  #define __ASM_ARCH_MXC_GPIO_H__
@@ -125,7 +125,7 @@ diff -Nur linux-2.6.35/arch/arm/plat-mxc/include/mach/gpio.h linux-2.6.35-ARCH/a
  int mxc_gpio_init(struct mxc_gpio_port*, int);
 diff -Nur linux-2.6.35/arch/parisc/kernel/firmware.c linux-2.6.35-ARCH/arch/parisc/kernel/firmware.c
 --- linux-2.6.35/arch/parisc/kernel/firmware.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/parisc/kernel/firmware.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/parisc/kernel/firmware.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1123,7 +1123,6 @@
   */
  int pdc_iodc_print(const unsigned char *str, unsigned count)
@@ -158,7 +158,7 @@ diff -Nur linux-2.6.35/arch/parisc/kernel/firmware.c linux-2.6.35-ARCH/arch/pari
  	}
 diff -Nur linux-2.6.35/arch/powerpc/kernel/perf_event_fsl_emb.c linux-2.6.35-ARCH/arch/powerpc/kernel/perf_event_fsl_emb.c
 --- linux-2.6.35/arch/powerpc/kernel/perf_event_fsl_emb.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/powerpc/kernel/perf_event_fsl_emb.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/powerpc/kernel/perf_event_fsl_emb.c	2010-08-20 21:24:47.000000000 +0000
 @@ -569,6 +569,7 @@
  		struct perf_sample_data data;
  
@@ -169,7 +169,7 @@ diff -Nur linux-2.6.35/arch/powerpc/kernel/perf_event_fsl_emb.c linux-2.6.35-ARC
  			/*
 diff -Nur linux-2.6.35/arch/powerpc/Makefile linux-2.6.35-ARCH/arch/powerpc/Makefile
 --- linux-2.6.35/arch/powerpc/Makefile	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/powerpc/Makefile	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/powerpc/Makefile	2010-08-20 21:24:47.000000000 +0000
 @@ -163,9 +163,11 @@
  # Default to zImage, override when needed
  all: zImage
@@ -205,7 +205,7 @@ diff -Nur linux-2.6.35/arch/powerpc/Makefile linux-2.6.35-ARCH/arch/powerpc/Make
  define archhelp
 diff -Nur linux-2.6.35/arch/x86/include/asm/cmpxchg_32.h linux-2.6.35-ARCH/arch/x86/include/asm/cmpxchg_32.h
 --- linux-2.6.35/arch/x86/include/asm/cmpxchg_32.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/include/asm/cmpxchg_32.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/include/asm/cmpxchg_32.h	2010-08-20 21:24:47.000000000 +0000
 @@ -27,20 +27,20 @@
  	switch (size) {							\
  	case 1:								\
@@ -326,7 +326,7 @@ diff -Nur linux-2.6.35/arch/x86/include/asm/cmpxchg_32.h linux-2.6.35-ARCH/arch/
  }
 diff -Nur linux-2.6.35/arch/x86/include/asm/cmpxchg_64.h linux-2.6.35-ARCH/arch/x86/include/asm/cmpxchg_64.h
 --- linux-2.6.35/arch/x86/include/asm/cmpxchg_64.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/include/asm/cmpxchg_64.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/include/asm/cmpxchg_64.h	2010-08-20 21:24:47.000000000 +0000
 @@ -26,26 +26,26 @@
  	switch (size) {							\
  	case 1:								\
@@ -404,7 +404,7 @@ diff -Nur linux-2.6.35/arch/x86/include/asm/cmpxchg_64.h linux-2.6.35-ARCH/arch/
  	default:							\
 diff -Nur linux-2.6.35/arch/x86/kernel/cpu/mtrr/main.c linux-2.6.35-ARCH/arch/x86/kernel/cpu/mtrr/main.c
 --- linux-2.6.35/arch/x86/kernel/cpu/mtrr/main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/kernel/cpu/mtrr/main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/kernel/cpu/mtrr/main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -35,6 +35,7 @@
  
  #include <linux/types.h> /* FIXME: kvm_para.h needs this */
@@ -556,8 +556,16 @@ diff -Nur linux-2.6.35/arch/x86/kernel/cpu/mtrr/main.c linux-2.6.35-ARCH/arch/x8
  /**
 diff -Nur linux-2.6.35/arch/x86/kernel/cpu/vmware.c linux-2.6.35-ARCH/arch/x86/kernel/cpu/vmware.c
 --- linux-2.6.35/arch/x86/kernel/cpu/vmware.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/kernel/cpu/vmware.c	2010-08-13 19:30:43.000000000 +0000
-@@ -51,7 +51,7 @@
++++ linux-2.6.35-ARCH/arch/x86/kernel/cpu/vmware.c	2010-08-20 21:24:47.000000000 +0000
+@@ -23,6 +23,7 @@
+ 
+ #include <linux/dmi.h>
+ #include <linux/module.h>
++#include <linux/jiffies.h>
+ #include <asm/div64.h>
+ #include <asm/x86_init.h>
+ #include <asm/hypervisor.h>
+@@ -51,7 +52,7 @@
  
  static unsigned long vmware_get_tsc_khz(void)
  {
@@ -566,7 +574,7 @@ diff -Nur linux-2.6.35/arch/x86/kernel/cpu/vmware.c linux-2.6.35-ARCH/arch/x86/k
  	uint32_t eax, ebx, ecx, edx;
  
  	VMWARE_PORT(GETHZ, eax, ebx, ecx, edx);
-@@ -62,6 +62,13 @@
+@@ -62,6 +63,13 @@
  	printk(KERN_INFO "TSC freq read from hypervisor : %lu.%03lu MHz\n",
  			 (unsigned long) tsc_hz / 1000,
  			 (unsigned long) tsc_hz % 1000);
@@ -582,7 +590,7 @@ diff -Nur linux-2.6.35/arch/x86/kernel/cpu/vmware.c linux-2.6.35-ARCH/arch/x86/k
  
 diff -Nur linux-2.6.35/arch/x86/kernel/smpboot.c linux-2.6.35-ARCH/arch/x86/kernel/smpboot.c
 --- linux-2.6.35/arch/x86/kernel/smpboot.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/kernel/smpboot.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/kernel/smpboot.c	2010-08-20 21:24:47.000000000 +0000
 @@ -816,6 +816,13 @@
  			if (cpumask_test_cpu(cpu, cpu_callin_mask))
  				break;	/* It has booted */
@@ -599,7 +607,7 @@ diff -Nur linux-2.6.35/arch/x86/kernel/smpboot.c linux-2.6.35-ARCH/arch/x86/kern
  		if (cpumask_test_cpu(cpu, cpu_callin_mask))
 diff -Nur linux-2.6.35/arch/x86/mm/fault.c linux-2.6.35-ARCH/arch/x86/mm/fault.c
 --- linux-2.6.35/arch/x86/mm/fault.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/mm/fault.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/mm/fault.c	2010-08-20 21:24:47.000000000 +0000
 @@ -802,8 +802,10 @@
  	up_read(&mm->mmap_sem);
  
@@ -614,7 +622,7 @@ diff -Nur linux-2.6.35/arch/x86/mm/fault.c linux-2.6.35-ARCH/arch/x86/mm/fault.c
  	if (is_prefetch(regs, error_code, address))
 diff -Nur linux-2.6.35/arch/x86/mm/kmmio.c linux-2.6.35-ARCH/arch/x86/mm/kmmio.c
 --- linux-2.6.35/arch/x86/mm/kmmio.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/mm/kmmio.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/mm/kmmio.c	2010-08-20 21:24:47.000000000 +0000
 @@ -45,6 +45,8 @@
  	 * Protected by kmmio_lock, when linked into kmmio_page_table.
  	 */
@@ -662,7 +670,7 @@ diff -Nur linux-2.6.35/arch/x86/mm/kmmio.c linux-2.6.35-ARCH/arch/x86/mm/kmmio.c
  		pr_crit("leaking kmmio_fault_page objects.\n");
 diff -Nur linux-2.6.35/arch/x86/mm/testmmiotrace.c linux-2.6.35-ARCH/arch/x86/mm/testmmiotrace.c
 --- linux-2.6.35/arch/x86/mm/testmmiotrace.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/mm/testmmiotrace.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/mm/testmmiotrace.c	2010-08-20 21:24:47.000000000 +0000
 @@ -90,6 +90,27 @@
  	iounmap(p);
  }
@@ -701,7 +709,7 @@ diff -Nur linux-2.6.35/arch/x86/mm/testmmiotrace.c linux-2.6.35-ARCH/arch/x86/mm
  }
 diff -Nur linux-2.6.35/arch/x86/pci/acpi.c linux-2.6.35-ARCH/arch/x86/pci/acpi.c
 --- linux-2.6.35/arch/x86/pci/acpi.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/pci/acpi.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/pci/acpi.c	2010-08-20 21:24:47.000000000 +0000
 @@ -34,6 +34,15 @@
  			DMI_MATCH(DMI_PRODUCT_NAME, "x3800"),
  		},
@@ -720,7 +728,7 @@ diff -Nur linux-2.6.35/arch/x86/pci/acpi.c linux-2.6.35-ARCH/arch/x86/pci/acpi.c
  
 diff -Nur linux-2.6.35/arch/x86/xen/enlighten.c linux-2.6.35-ARCH/arch/x86/xen/enlighten.c
 --- linux-2.6.35/arch/x86/xen/enlighten.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/xen/enlighten.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/xen/enlighten.c	2010-08-20 21:24:47.000000000 +0000
 @@ -927,7 +927,7 @@
  };
  
@@ -732,7 +740,7 @@ diff -Nur linux-2.6.35/arch/x86/xen/enlighten.c linux-2.6.35-ARCH/arch/x86/xen/e
  static const struct pv_cpu_ops xen_cpu_ops __initdata = {
 diff -Nur linux-2.6.35/arch/x86/xen/time.c linux-2.6.35-ARCH/arch/x86/xen/time.c
 --- linux-2.6.35/arch/x86/xen/time.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/arch/x86/xen/time.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/arch/x86/xen/time.c	2010-08-20 21:24:47.000000000 +0000
 @@ -155,45 +155,6 @@
  	account_idle_ticks(ticks);
  }
@@ -781,7 +789,7 @@ diff -Nur linux-2.6.35/arch/x86/xen/time.c linux-2.6.35-ARCH/arch/x86/xen/time.c
  {
 diff -Nur linux-2.6.35/crypto/algboss.c linux-2.6.35-ARCH/crypto/algboss.c
 --- linux-2.6.35/crypto/algboss.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/crypto/algboss.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/crypto/algboss.c	2010-08-20 21:24:47.000000000 +0000
 @@ -206,6 +206,7 @@
  	return NOTIFY_OK;
  }
@@ -811,7 +819,7 @@ diff -Nur linux-2.6.35/crypto/algboss.c linux-2.6.35-ARCH/crypto/algboss.c
  	return NOTIFY_DONE;
 diff -Nur linux-2.6.35/crypto/Kconfig linux-2.6.35-ARCH/crypto/Kconfig
 --- linux-2.6.35/crypto/Kconfig	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/crypto/Kconfig	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/crypto/Kconfig	2010-08-20 21:24:47.000000000 +0000
 @@ -96,6 +96,14 @@
  	select CRYPTO_BLKCIPHER2
  	select CRYPTO_PCOMP
@@ -829,7 +837,7 @@ diff -Nur linux-2.6.35/crypto/Kconfig linux-2.6.35-ARCH/crypto/Kconfig
  	depends on EXPERIMENTAL
 diff -Nur linux-2.6.35/crypto/testmgr.c linux-2.6.35-ARCH/crypto/testmgr.c
 --- linux-2.6.35/crypto/testmgr.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/crypto/testmgr.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/crypto/testmgr.c	2010-08-20 21:24:47.000000000 +0000
 @@ -22,6 +22,17 @@
  #include <crypto/rng.h>
  
@@ -858,7 +866,7 @@ diff -Nur linux-2.6.35/crypto/testmgr.c linux-2.6.35-ARCH/crypto/testmgr.c
  EXPORT_SYMBOL_GPL(alg_test);
 diff -Nur linux-2.6.35/drivers/ata/ata_piix.c linux-2.6.35-ARCH/drivers/ata/ata_piix.c
 --- linux-2.6.35/drivers/ata/ata_piix.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/ata/ata_piix.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/ata/ata_piix.c	2010-08-20 21:24:47.000000000 +0000
 @@ -158,6 +158,7 @@
  struct piix_host_priv {
  	const int *map;
@@ -909,7 +917,7 @@ diff -Nur linux-2.6.35/drivers/ata/ata_piix.c linux-2.6.35-ARCH/drivers/ata/ata_
  	 * detection and restoration on detach.  This is necessary
 diff -Nur linux-2.6.35/drivers/atm/solos-pci.c linux-2.6.35-ARCH/drivers/atm/solos-pci.c
 --- linux-2.6.35/drivers/atm/solos-pci.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/atm/solos-pci.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/atm/solos-pci.c	2010-08-20 21:24:47.000000000 +0000
 @@ -781,7 +781,8 @@
  	sk_for_each(s, node, head) {
  		vcc = atm_sk(s);
@@ -933,7 +941,7 @@ diff -Nur linux-2.6.35/drivers/atm/solos-pci.c linux-2.6.35-ARCH/drivers/atm/sol
  
 diff -Nur linux-2.6.35/drivers/block/drbd/drbd_main.c linux-2.6.35-ARCH/drivers/block/drbd/drbd_main.c
 --- linux-2.6.35/drivers/block/drbd/drbd_main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/block/drbd/drbd_main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/block/drbd/drbd_main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -2371,11 +2371,7 @@
  
  static void consider_delay_probes(struct drbd_conf *mdev)
@@ -977,7 +985,7 @@ diff -Nur linux-2.6.35/drivers/block/drbd/drbd_main.c linux-2.6.35-ARCH/drivers/
  		  .peer = R_UNKNOWN,
 diff -Nur linux-2.6.35/drivers/bluetooth/btusb.c linux-2.6.35-ARCH/drivers/bluetooth/btusb.c
 --- linux-2.6.35/drivers/bluetooth/btusb.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/bluetooth/btusb.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/bluetooth/btusb.c	2010-08-20 21:24:47.000000000 +0000
 @@ -59,6 +59,9 @@
  	/* Generic Bluetooth USB device */
  	{ USB_DEVICE_INFO(0xe0, 0x01, 0x01) },
@@ -990,7 +998,7 @@ diff -Nur linux-2.6.35/drivers/bluetooth/btusb.c linux-2.6.35-ARCH/drivers/bluet
  
 diff -Nur linux-2.6.35/drivers/char/ipmi/ipmi_si_intf.c linux-2.6.35-ARCH/drivers/char/ipmi/ipmi_si_intf.c
 --- linux-2.6.35/drivers/char/ipmi/ipmi_si_intf.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/char/ipmi/ipmi_si_intf.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/char/ipmi/ipmi_si_intf.c	2010-08-20 21:24:47.000000000 +0000
 @@ -2176,6 +2176,14 @@
  	info->io.addr_data = res->start;
  
@@ -1008,7 +1016,7 @@ diff -Nur linux-2.6.35/drivers/char/ipmi/ipmi_si_intf.c linux-2.6.35-ARCH/driver
  
 diff -Nur linux-2.6.35/drivers/char/nozomi.c linux-2.6.35-ARCH/drivers/char/nozomi.c
 --- linux-2.6.35/drivers/char/nozomi.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/char/nozomi.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/char/nozomi.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1611,6 +1611,8 @@
  	ret = tty_init_termios(tty);
  	if (ret == 0) {
@@ -1029,7 +1037,7 @@ diff -Nur linux-2.6.35/drivers/char/nozomi.c linux-2.6.35-ARCH/drivers/char/nozo
  
 diff -Nur linux-2.6.35/drivers/dma/ioat/dma.h linux-2.6.35-ARCH/drivers/dma/ioat/dma.h
 --- linux-2.6.35/drivers/dma/ioat/dma.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/dma/ioat/dma.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/dma/ioat/dma.h	2010-08-20 21:24:47.000000000 +0000
 @@ -97,6 +97,7 @@
  	#define IOAT_RESET_PENDING 2
  	#define IOAT_KOBJ_INIT_FAIL 3
@@ -1040,7 +1048,7 @@ diff -Nur linux-2.6.35/drivers/dma/ioat/dma.h linux-2.6.35-ARCH/drivers/dma/ioat
  	#define IDLE_TIMEOUT msecs_to_jiffies(2000)
 diff -Nur linux-2.6.35/drivers/dma/ioat/dma_v2.c linux-2.6.35-ARCH/drivers/dma/ioat/dma_v2.c
 --- linux-2.6.35/drivers/dma/ioat/dma_v2.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/dma/ioat/dma_v2.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/dma/ioat/dma_v2.c	2010-08-20 21:24:47.000000000 +0000
 @@ -287,7 +287,10 @@
  			chanerr = readl(chan->reg_base + IOAT_CHANERR_OFFSET);
  			dev_err(to_dev(chan), "%s: Channel halted (%x)\n",
@@ -1102,7 +1110,7 @@ diff -Nur linux-2.6.35/drivers/dma/ioat/dma_v2.c linux-2.6.35-ARCH/drivers/dma/i
  	spin_lock_bh(&ioat->prep_lock);
 diff -Nur linux-2.6.35/drivers/dma/ioat/dma_v3.c linux-2.6.35-ARCH/drivers/dma/ioat/dma_v3.c
 --- linux-2.6.35/drivers/dma/ioat/dma_v3.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/dma/ioat/dma_v3.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/dma/ioat/dma_v3.c	2010-08-20 21:24:47.000000000 +0000
 @@ -361,7 +361,10 @@
  			chanerr = readl(chan->reg_base + IOAT_CHANERR_OFFSET);
  			dev_err(to_dev(chan), "%s: Channel halted (%x)\n",
@@ -1117,7 +1125,7 @@ diff -Nur linux-2.6.35/drivers/dma/ioat/dma_v3.c linux-2.6.35-ARCH/drivers/dma/i
  		/* if we haven't made progress and we have already
 diff -Nur linux-2.6.35/drivers/edac/amd64_edac.c linux-2.6.35-ARCH/drivers/edac/amd64_edac.c
 --- linux-2.6.35/drivers/edac/amd64_edac.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/edac/amd64_edac.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/edac/amd64_edac.c	2010-08-20 21:24:47.000000000 +0000
 @@ -178,7 +178,7 @@
  
  	default:
@@ -1147,7 +1155,7 @@ diff -Nur linux-2.6.35/drivers/edac/amd64_edac.c linux-2.6.35-ARCH/drivers/edac/
  	if (chan >= 0)
 diff -Nur linux-2.6.35/drivers/gpu/drm/i915/intel_display.c linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_display.c
 --- linux-2.6.35/drivers/gpu/drm/i915/intel_display.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_display.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_display.c	2010-08-20 21:24:47.000000000 +0000
 @@ -42,6 +42,7 @@
  bool intel_pipe_has_type (struct drm_crtc *crtc, int type);
  static void intel_update_watermarks(struct drm_device *dev);
@@ -1361,7 +1369,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/i915/intel_display.c linux-2.6.35-ARCH/dr
  }
 diff -Nur linux-2.6.35/drivers/gpu/drm/i915/intel_drv.h linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_drv.h
 --- linux-2.6.35/drivers/gpu/drm/i915/intel_drv.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_drv.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_drv.h	2010-08-20 21:24:47.000000000 +0000
 @@ -143,8 +143,6 @@
  	struct drm_crtc base;
  	enum pipe pipe;
@@ -1386,7 +1394,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/i915/intel_drv.h linux-2.6.35-ARCH/driver
  #define to_intel_crtc(x) container_of(x, struct intel_crtc, base)
 diff -Nur linux-2.6.35/drivers/gpu/drm/i915/intel_overlay.c linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_overlay.c
 --- linux-2.6.35/drivers/gpu/drm/i915/intel_overlay.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_overlay.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/i915/intel_overlay.c	2010-08-20 21:24:47.000000000 +0000
 @@ -958,7 +958,7 @@
  	    || rec->src_width < N_HORIZ_Y_TAPS*4)
  		return -EINVAL;
@@ -1410,7 +1418,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/i915/intel_overlay.c linux-2.6.35-ARCH/dr
  		return -EINVAL;
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/r600.c linux-2.6.35-ARCH/drivers/gpu/drm/radeon/r600.c
 --- linux-2.6.35/drivers/gpu/drm/radeon/r600.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/r600.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/r600.c	2010-08-20 21:24:47.000000000 +0000
 @@ -869,7 +869,17 @@
  	u32 tmp;
  
@@ -1449,7 +1457,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/r600.c linux-2.6.35-ARCH/drivers/g
  }
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/r600d.h linux-2.6.35-ARCH/drivers/gpu/drm/radeon/r600d.h
 --- linux-2.6.35/drivers/gpu/drm/radeon/r600d.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/r600d.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/r600d.h	2010-08-20 21:24:47.000000000 +0000
 @@ -245,6 +245,7 @@
  #define	HDP_NONSURFACE_SIZE				0x2C0C
  #define HDP_REG_COHERENCY_FLUSH_CNTL			0x54A0
@@ -1460,7 +1468,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/r600d.h linux-2.6.35-ARCH/drivers/
  #define MC_VM_AGP_BOT					0x2188
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/radeon_object.c linux-2.6.35-ARCH/drivers/gpu/drm/radeon/radeon_object.c
 --- linux-2.6.35/drivers/gpu/drm/radeon/radeon_object.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/radeon_object.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/radeon_object.c	2010-08-20 21:24:47.000000000 +0000
 @@ -110,6 +110,7 @@
  	bo->surface_reg = -1;
  	INIT_LIST_HEAD(&bo->list);
@@ -1524,7 +1532,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/radeon_object.c linux-2.6.35-ARCH/
  		lobj->tiling_flags = bo->tiling_flags;
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rs690.c linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rs690.c
 --- linux-2.6.35/drivers/gpu/drm/radeon/rs690.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rs690.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rs690.c	2010-08-20 21:24:47.000000000 +0000
 @@ -398,7 +398,9 @@
  	struct drm_display_mode *mode1 = NULL;
  	struct rs690_watermark wm0;
@@ -1583,7 +1591,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rs690.c linux-2.6.35-ARCH/drivers/
  uint32_t rs690_mc_rreg(struct radeon_device *rdev, uint32_t reg)
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rv515.c linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv515.c
 --- linux-2.6.35/drivers/gpu/drm/radeon/rv515.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv515.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv515.c	2010-08-20 21:24:47.000000000 +0000
 @@ -925,7 +925,9 @@
  	struct drm_display_mode *mode1 = NULL;
  	struct rv515_watermark wm0;
@@ -1638,7 +1646,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rv515.c linux-2.6.35-ARCH/drivers/
  void rv515_bandwidth_update(struct radeon_device *rdev)
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rv770.c linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv770.c
 --- linux-2.6.35/drivers/gpu/drm/radeon/rv770.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv770.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv770.c	2010-08-20 21:24:47.000000000 +0000
 @@ -189,7 +189,10 @@
  		WREG32((0x2c20 + j), 0x00000000);
  		WREG32((0x2c24 + j), 0x00000000);
@@ -1653,7 +1661,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rv770.c linux-2.6.35-ARCH/drivers/
  	if (r600_mc_wait_for_idle(rdev)) {
 diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rv770d.h linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv770d.h
 --- linux-2.6.35/drivers/gpu/drm/radeon/rv770d.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv770d.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/gpu/drm/radeon/rv770d.h	2010-08-20 21:24:47.000000000 +0000
 @@ -128,6 +128,7 @@
  #define	HDP_NONSURFACE_SIZE				0x2C0C
  #define HDP_REG_COHERENCY_FLUSH_CNTL			0x54A0
@@ -1664,7 +1672,7 @@ diff -Nur linux-2.6.35/drivers/gpu/drm/radeon/rv770d.h linux-2.6.35-ARCH/drivers
  #define		NOOFCHAN_SHIFT					12
 diff -Nur linux-2.6.35/drivers/ide/ide-cd.c linux-2.6.35-ARCH/drivers/ide/ide-cd.c
 --- linux-2.6.35/drivers/ide/ide-cd.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/ide/ide-cd.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/ide/ide-cd.c	2010-08-20 21:24:47.000000000 +0000
 @@ -506,15 +506,22 @@
  	return (flags & REQ_FAILED) ? -EIO : 0;
  }
@@ -1702,7 +1710,7 @@ diff -Nur linux-2.6.35/drivers/ide/ide-cd.c linux-2.6.35-ARCH/drivers/ide/ide-cd
  		if (blk_fs_request(rq) == 0) {
 diff -Nur linux-2.6.35/drivers/md/md.c linux-2.6.35-ARCH/drivers/md/md.c
 --- linux-2.6.35/drivers/md/md.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/md/md.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/md/md.c	2010-08-20 21:24:47.000000000 +0000
 @@ -532,13 +532,17 @@
  		 * an access to the files will try to take reconfig_mutex
  		 * while holding the file unremovable, which leads to
@@ -1798,7 +1806,7 @@ diff -Nur linux-2.6.35/drivers/md/md.c linux-2.6.35-ARCH/drivers/md/md.c
  	/*
 diff -Nur linux-2.6.35/drivers/md/md.h linux-2.6.35-ARCH/drivers/md/md.h
 --- linux-2.6.35/drivers/md/md.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/md/md.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/md/md.h	2010-08-20 21:24:47.000000000 +0000
 @@ -125,6 +125,10 @@
  	int				suspended;
  	atomic_t			active_io;
@@ -1812,7 +1820,7 @@ diff -Nur linux-2.6.35/drivers/md/md.h linux-2.6.35-ARCH/drivers/md/md.h
  
 diff -Nur linux-2.6.35/drivers/md/raid10.c linux-2.6.35-ARCH/drivers/md/raid10.c
 --- linux-2.6.35/drivers/md/raid10.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/md/raid10.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/md/raid10.c	2010-08-20 21:24:47.000000000 +0000
 @@ -825,11 +825,29 @@
  		 */
  		bp = bio_split(bio,
@@ -1845,7 +1853,7 @@ diff -Nur linux-2.6.35/drivers/md/raid10.c linux-2.6.35-ARCH/drivers/md/raid10.c
  	bad_map:
 diff -Nur linux-2.6.35/drivers/misc/enclosure.c linux-2.6.35-ARCH/drivers/misc/enclosure.c
 --- linux-2.6.35/drivers/misc/enclosure.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/misc/enclosure.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/misc/enclosure.c	2010-08-20 21:24:47.000000000 +0000
 @@ -285,8 +285,11 @@
  	cdev->groups = enclosure_groups;
  
@@ -1862,7 +1870,7 @@ diff -Nur linux-2.6.35/drivers/misc/enclosure.c linux-2.6.35-ARCH/drivers/misc/e
  }
 diff -Nur linux-2.6.35/drivers/mtd/nand/mxc_nand.c linux-2.6.35-ARCH/drivers/mtd/nand/mxc_nand.c
 --- linux-2.6.35/drivers/mtd/nand/mxc_nand.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/mtd/nand/mxc_nand.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/mtd/nand/mxc_nand.c	2010-08-20 21:24:47.000000000 +0000
 @@ -604,8 +604,8 @@
  	/* Command pre-processing step */
  	switch (command) {
@@ -1875,7 +1883,7 @@ diff -Nur linux-2.6.35/drivers/mtd/nand/mxc_nand.c linux-2.6.35-ARCH/drivers/mtd
  	case NAND_CMD_STATUS:
 diff -Nur linux-2.6.35/drivers/mtd/nand/plat_nand.c linux-2.6.35-ARCH/drivers/mtd/nand/plat_nand.c
 --- linux-2.6.35/drivers/mtd/nand/plat_nand.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/mtd/nand/plat_nand.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/mtd/nand/plat_nand.c	2010-08-20 21:24:47.000000000 +0000
 @@ -91,7 +91,7 @@
  	}
  
@@ -1887,7 +1895,7 @@ diff -Nur linux-2.6.35/drivers/mtd/nand/plat_nand.c linux-2.6.35-ARCH/drivers/mt
  	}
 diff -Nur linux-2.6.35/drivers/net/e1000/e1000_main.c linux-2.6.35-ARCH/drivers/net/e1000/e1000_main.c
 --- linux-2.6.35/drivers/net/e1000/e1000_main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/e1000/e1000_main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/e1000/e1000_main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -3448,6 +3448,7 @@
  	while ((eop_desc->upper.data & cpu_to_le32(E1000_TXD_STAT_DD)) &&
  	       (count < tx_ring->count)) {
@@ -1914,7 +1922,7 @@ diff -Nur linux-2.6.35/drivers/net/e1000/e1000_main.c linux-2.6.35-ARCH/drivers/
  		skb = buffer_info->skb;
 diff -Nur linux-2.6.35/drivers/net/e1000e/hw.h linux-2.6.35-ARCH/drivers/net/e1000e/hw.h
 --- linux-2.6.35/drivers/net/e1000e/hw.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/e1000e/hw.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/e1000e/hw.h	2010-08-20 21:24:47.000000000 +0000
 @@ -308,7 +308,7 @@
  #define E1000_KMRNCTRLSTA_INBAND_PARAM	0x9    /* Kumeran InBand Parameters */
  #define E1000_KMRNCTRLSTA_DIAG_NELPBK	0x1000 /* Nearend Loopback mode */
@@ -1926,7 +1934,7 @@ diff -Nur linux-2.6.35/drivers/net/e1000e/hw.h linux-2.6.35-ARCH/drivers/net/e10
  #define IFE_PHY_EXTENDED_STATUS_CONTROL	0x10
 diff -Nur linux-2.6.35/drivers/net/e1000e/netdev.c linux-2.6.35-ARCH/drivers/net/e1000e/netdev.c
 --- linux-2.6.35/drivers/net/e1000e/netdev.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/e1000e/netdev.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/e1000e/netdev.c	2010-08-20 21:24:47.000000000 +0000
 @@ -774,6 +774,7 @@
  		if (*work_done >= work_to_do)
  			break;
@@ -1984,7 +1992,7 @@ diff -Nur linux-2.6.35/drivers/net/e1000e/netdev.c linux-2.6.35-ARCH/drivers/net
  	if (!err)
 diff -Nur linux-2.6.35/drivers/net/e100.c linux-2.6.35-ARCH/drivers/net/e100.c
 --- linux-2.6.35/drivers/net/e100.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/e100.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/e100.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1779,6 +1779,7 @@
  	for (cb = nic->cb_to_clean;
  	    cb->status & cpu_to_le16(cb_complete);
@@ -2003,7 +2011,7 @@ diff -Nur linux-2.6.35/drivers/net/e100.c linux-2.6.35-ARCH/drivers/net/e100.c
  	if (unlikely(!(rfd_status & cb_complete))) {
 diff -Nur linux-2.6.35/drivers/net/igb/igb_main.c linux-2.6.35-ARCH/drivers/net/igb/igb_main.c
 --- linux-2.6.35/drivers/net/igb/igb_main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/igb/igb_main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/igb/igb_main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -630,9 +630,6 @@
  			for (; i < adapter->rss_queues; i++)
  				adapter->rx_ring[i]->reg_idx = rbase_offset +
@@ -2044,7 +2052,7 @@ diff -Nur linux-2.6.35/drivers/net/igb/igb_main.c linux-2.6.35-ARCH/drivers/net/
  		prefetch(skb->data - NET_IP_ALIGN);
 diff -Nur linux-2.6.35/drivers/net/igbvf/netdev.c linux-2.6.35-ARCH/drivers/net/igbvf/netdev.c
 --- linux-2.6.35/drivers/net/igbvf/netdev.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/igbvf/netdev.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/igbvf/netdev.c	2010-08-20 21:24:47.000000000 +0000
 @@ -248,6 +248,7 @@
  		if (*work_done >= work_to_do)
  			break;
@@ -2063,7 +2071,7 @@ diff -Nur linux-2.6.35/drivers/net/igbvf/netdev.c linux-2.6.35-ARCH/drivers/net/
  			buffer_info = &tx_ring->buffer_info[i];
 diff -Nur linux-2.6.35/drivers/net/ixgb/ixgb_main.c linux-2.6.35-ARCH/drivers/net/ixgb/ixgb_main.c
 --- linux-2.6.35/drivers/net/ixgb/ixgb_main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/ixgb/ixgb_main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/ixgb/ixgb_main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1816,6 +1816,7 @@
  
  	while (eop_desc->status & IXGB_TX_DESC_STATUS_DD) {
@@ -2082,7 +2090,7 @@ diff -Nur linux-2.6.35/drivers/net/ixgb/ixgb_main.c linux-2.6.35-ARCH/drivers/ne
  		buffer_info->skb = NULL;
 diff -Nur linux-2.6.35/drivers/net/ixgbe/ixgbe_main.c linux-2.6.35-ARCH/drivers/net/ixgbe/ixgbe_main.c
 --- linux-2.6.35/drivers/net/ixgbe/ixgbe_main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/ixgbe/ixgbe_main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/ixgbe/ixgbe_main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -748,6 +748,7 @@
  	while ((eop_desc->wb.status & cpu_to_le32(IXGBE_TXD_STAT_DD)) &&
  	       (count < tx_ring->work_limit)) {
@@ -2093,7 +2101,7 @@ diff -Nur linux-2.6.35/drivers/net/ixgbe/ixgbe_main.c linux-2.6.35-ARCH/drivers/
  			tx_desc = IXGBE_TX_DESC_ADV(*tx_ring, i);
 diff -Nur linux-2.6.35/drivers/net/ixgbevf/ixgbevf_main.c linux-2.6.35-ARCH/drivers/net/ixgbevf/ixgbevf_main.c
 --- linux-2.6.35/drivers/net/ixgbevf/ixgbevf_main.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/ixgbevf/ixgbevf_main.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/ixgbevf/ixgbevf_main.c	2010-08-20 21:24:47.000000000 +0000
 @@ -231,6 +231,7 @@
  	while ((eop_desc->wb.status & cpu_to_le32(IXGBE_TXD_STAT_DD)) &&
  	       (count < tx_ring->work_limit)) {
@@ -2112,7 +2120,7 @@ diff -Nur linux-2.6.35/drivers/net/ixgbevf/ixgbevf_main.c linux-2.6.35-ARCH/driv
  			len = (hdr_info & IXGBE_RXDADV_HDRBUFLEN_MASK) >>
 diff -Nur linux-2.6.35/drivers/net/smsc911x.c linux-2.6.35-ARCH/drivers/net/smsc911x.c
 --- linux-2.6.35/drivers/net/smsc911x.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/smsc911x.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/smsc911x.c	2010-08-20 21:24:47.000000000 +0000
 @@ -84,8 +84,7 @@
  	 */
  	spinlock_t mac_lock;
@@ -2284,7 +2292,7 @@ diff -Nur linux-2.6.35/drivers/net/smsc911x.c linux-2.6.35-ARCH/drivers/net/smsc
  /* waits for MAC not busy, with timeout.  Only called by smsc911x_mac_read
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/ar9002_calib.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/ar9002_calib.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/ar9002_calib.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/ar9002_calib.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/ar9002_calib.c	2010-08-20 21:24:47.000000000 +0000
 @@ -239,7 +239,7 @@
  			if (qCoff > 15)
  				qCoff = 15;
@@ -2296,7 +2304,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/ar9002_calib.c linux-2.6.3
  				  "Chn %d : iCoff = 0x%x  qCoff = 0x%x\n",
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c	2010-08-20 21:24:47.000000000 +0000
 @@ -944,7 +944,7 @@
  	return 1;
  }
@@ -2308,7 +2316,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/ar9003_eeprom.c linux-2.6.
  	return -EINVAL;
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_4k.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_4k.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_4k.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_4k.c	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_4k.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1149,13 +1149,13 @@
  	}
  }
@@ -2327,7 +2335,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_4k.c linux-2.6.35-A
  static u8 ath9k_hw_4k_get_num_ant_config(struct ath_hw *ah,
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_9287.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_9287.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_9287.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_9287.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_9287.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1131,13 +1131,13 @@
  	return 1;
  }
@@ -2346,7 +2354,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_9287.c linux-2.6.35
  static u16 ath9k_hw_AR9287_get_spur_channel(struct ath_hw *ah,
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_def.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_def.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_def.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_def.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom_def.c	2010-08-20 21:24:47.000000000 +0000
 @@ -729,7 +729,7 @@
  				    vpdTableI[i][sizeCurrVpdTable - 2]);
  		vpdStep = (int16_t)((vpdStep < 1) ? 1 : vpdStep);
@@ -2375,7 +2383,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom_def.c linux-2.6.35-
  static u16 ath9k_hw_def_get_spur_channel(struct ath_hw *ah, u16 i, bool is2GHz)
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom.h linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom.h
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom.h	2010-08-13 19:30:43.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/eeprom.h	2010-08-20 21:24:47.000000000 +0000
 @@ -669,7 +669,7 @@
  	int (*get_eeprom_ver)(struct ath_hw *hw);
  	int (*get_eeprom_rev)(struct ath_hw *hw);
@@ -2387,7 +2395,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/eeprom.h linux-2.6.35-ARCH
  	void (*set_addac)(struct ath_hw *hw, struct ath9k_channel *chan);
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/hw.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/hw.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/hw.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/hw.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/hw.c	2010-08-20 21:24:47.000000000 +0000
 @@ -537,7 +537,8 @@
  
  	if (ah->config.serialize_regmode == SER_REG_MODE_AUTO) {
@@ -2450,7 +2458,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/hw.c linux-2.6.35-ARCH/dri
  		/* Mask Retry(b11), PwrMgt(b12), MoreData(b13) to 0 in mgmt
 diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/xmit.c linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/xmit.c
 --- linux-2.6.35/drivers/net/wireless/ath/ath9k/xmit.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/xmit.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/ath/ath9k/xmit.c	2010-08-20 21:24:47.000000000 +0000
 @@ -328,6 +328,7 @@
  	u32 ba[WME_BA_BMP_SIZE >> 5];
  	int isaggr, txfail, txpending, sendbar = 0, needreset = 0, nbad = 0;
@@ -2629,7 +2637,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/ath/ath9k/xmit.c linux-2.6.35-ARCH/d
  }
 diff -Nur linux-2.6.35/drivers/net/wireless/iwlwifi/iwl-devtrace.h linux-2.6.35-ARCH/drivers/net/wireless/iwlwifi/iwl-devtrace.h
 --- linux-2.6.35/drivers/net/wireless/iwlwifi/iwl-devtrace.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/iwlwifi/iwl-devtrace.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/iwlwifi/iwl-devtrace.h	2010-08-20 21:24:47.000000000 +0000
 @@ -193,7 +193,7 @@
  		__entry->framelen = buf0_len + buf1_len;
  		memcpy(__get_dynamic_array(tfd), tfd, tfdlen);
@@ -2641,7 +2649,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/iwlwifi/iwl-devtrace.h linux-2.6.35-
  		  __entry->priv,
 diff -Nur linux-2.6.35/drivers/net/wireless/iwlwifi/iwl-scan.c linux-2.6.35-ARCH/drivers/net/wireless/iwlwifi/iwl-scan.c
 --- linux-2.6.35/drivers/net/wireless/iwlwifi/iwl-scan.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/iwlwifi/iwl-scan.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/iwlwifi/iwl-scan.c	2010-08-20 21:24:47.000000000 +0000
 @@ -420,11 +420,10 @@
  		return;
  
@@ -2677,7 +2685,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/iwlwifi/iwl-scan.c linux-2.6.35-ARCH
  EXPORT_SYMBOL(iwl_bg_abort_scan);
 diff -Nur linux-2.6.35/drivers/net/wireless/rtl818x/rtl8180_dev.c linux-2.6.35-ARCH/drivers/net/wireless/rtl818x/rtl8180_dev.c
 --- linux-2.6.35/drivers/net/wireless/rtl818x/rtl8180_dev.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/wireless/rtl818x/rtl8180_dev.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/wireless/rtl818x/rtl8180_dev.c	2010-08-20 21:24:47.000000000 +0000
 @@ -688,6 +688,8 @@
  
  	/* grab a fresh beacon */
@@ -2689,7 +2697,7 @@ diff -Nur linux-2.6.35/drivers/net/wireless/rtl818x/rtl8180_dev.c linux-2.6.35-A
  	 * update beacon timestamp w/ TSF value
 diff -Nur linux-2.6.35/drivers/net/xen-netfront.c linux-2.6.35-ARCH/drivers/net/xen-netfront.c
 --- linux-2.6.35/drivers/net/xen-netfront.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/net/xen-netfront.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/net/xen-netfront.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1621,6 +1621,7 @@
  		if (xennet_connect(netdev) != 0)
  			break;
@@ -2700,7 +2708,7 @@ diff -Nur linux-2.6.35/drivers/net/xen-netfront.c linux-2.6.35-ARCH/drivers/net/
  	case XenbusStateClosing:
 diff -Nur linux-2.6.35/drivers/parisc/led.c linux-2.6.35-ARCH/drivers/parisc/led.c
 --- linux-2.6.35/drivers/parisc/led.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/parisc/led.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/parisc/led.c	2010-08-20 21:24:47.000000000 +0000
 @@ -176,16 +176,18 @@
  	size_t count, loff_t *pos)
  {
@@ -2724,7 +2732,7 @@ diff -Nur linux-2.6.35/drivers/parisc/led.c linux-2.6.35-ARCH/drivers/parisc/led
  
 diff -Nur linux-2.6.35/drivers/pci/intel-iommu.c linux-2.6.35-ARCH/drivers/pci/intel-iommu.c
 --- linux-2.6.35/drivers/pci/intel-iommu.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/pci/intel-iommu.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/pci/intel-iommu.c	2010-08-20 21:24:47.000000000 +0000
 @@ -3030,6 +3030,34 @@
  
  }
@@ -2762,7 +2770,7 @@ diff -Nur linux-2.6.35/drivers/pci/intel-iommu.c linux-2.6.35-ARCH/drivers/pci/i
  	struct dmar_drhd_unit *drhd;
 diff -Nur linux-2.6.35/drivers/pci/quirks.c linux-2.6.35-ARCH/drivers/pci/quirks.c
 --- linux-2.6.35/drivers/pci/quirks.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/pci/quirks.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/pci/quirks.c	2010-08-20 21:24:47.000000000 +0000
 @@ -2115,6 +2115,7 @@
  DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_VT3336, quirk_disable_all_msi);
  DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_VIA, PCI_DEVICE_ID_VIA_VT3351, quirk_disable_all_msi);
@@ -2783,7 +2791,7 @@ diff -Nur linux-2.6.35/drivers/pci/quirks.c linux-2.6.35-ARCH/drivers/pci/quirks
  
 diff -Nur linux-2.6.35/drivers/pcmcia/pcmcia_resource.c linux-2.6.35-ARCH/drivers/pcmcia/pcmcia_resource.c
 --- linux-2.6.35/drivers/pcmcia/pcmcia_resource.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/pcmcia/pcmcia_resource.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/pcmcia/pcmcia_resource.c	2010-08-20 21:24:47.000000000 +0000
 @@ -651,7 +651,7 @@
  #ifdef CONFIG_PCMCIA_PROBE
  
@@ -2805,7 +2813,7 @@ diff -Nur linux-2.6.35/drivers/pcmcia/pcmcia_resource.c linux-2.6.35-ARCH/driver
  			continue;
 diff -Nur linux-2.6.35/drivers/serial/8250_pci.c linux-2.6.35-ARCH/drivers/serial/8250_pci.c
 --- linux-2.6.35/drivers/serial/8250_pci.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/serial/8250_pci.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/serial/8250_pci.c	2010-08-20 21:24:47.000000000 +0000
 @@ -994,6 +994,7 @@
  #define PCI_DEVICE_ID_TITAN_800E	0xA014
  #define PCI_DEVICE_ID_TITAN_200EI	0xA016
@@ -2849,7 +2857,7 @@ diff -Nur linux-2.6.35/drivers/serial/8250_pci.c linux-2.6.35-ARCH/drivers/seria
  	 * Oxford Semiconductor Inc. Tornado PCI express device range.
 diff -Nur linux-2.6.35/drivers/ssb/driver_chipcommon.c linux-2.6.35-ARCH/drivers/ssb/driver_chipcommon.c
 --- linux-2.6.35/drivers/ssb/driver_chipcommon.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/ssb/driver_chipcommon.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/ssb/driver_chipcommon.c	2010-08-20 21:24:47.000000000 +0000
 @@ -235,6 +235,7 @@
  		return; /* We don't have a ChipCommon */
  	if (cc->dev->id.revision >= 11)
@@ -2860,7 +2868,7 @@ diff -Nur linux-2.6.35/drivers/ssb/driver_chipcommon.c linux-2.6.35-ARCH/drivers
  	ssb_chipco_set_clockmode(cc, SSB_CLKMODE_FAST);
 diff -Nur linux-2.6.35/drivers/ssb/pci.c linux-2.6.35-ARCH/drivers/ssb/pci.c
 --- linux-2.6.35/drivers/ssb/pci.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/ssb/pci.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/ssb/pci.c	2010-08-20 21:24:47.000000000 +0000
 @@ -626,11 +626,22 @@
  		return -ENODEV;
  	}
@@ -2888,7 +2896,7 @@ diff -Nur linux-2.6.35/drivers/ssb/pci.c linux-2.6.35-ARCH/drivers/ssb/pci.c
  	if (!buf)
 diff -Nur linux-2.6.35/drivers/staging/hv/Kconfig linux-2.6.35-ARCH/drivers/staging/hv/Kconfig
 --- linux-2.6.35/drivers/staging/hv/Kconfig	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/staging/hv/Kconfig	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/staging/hv/Kconfig	2010-08-20 21:24:47.000000000 +0000
 @@ -17,7 +17,7 @@
  
  config HYPERV_BLOCK
@@ -2900,7 +2908,7 @@ diff -Nur linux-2.6.35/drivers/staging/hv/Kconfig linux-2.6.35-ARCH/drivers/stag
  	  Select this option to enable the Hyper-V virtual block driver.
 diff -Nur linux-2.6.35/drivers/staging/line6/Kconfig linux-2.6.35-ARCH/drivers/staging/line6/Kconfig
 --- linux-2.6.35/drivers/staging/line6/Kconfig	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/staging/line6/Kconfig	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/staging/line6/Kconfig	2010-08-20 21:24:47.000000000 +0000
 @@ -2,6 +2,7 @@
  	tristate "Line6 USB support"
  	depends on USB && SND
@@ -2911,7 +2919,7 @@ diff -Nur linux-2.6.35/drivers/staging/line6/Kconfig linux-2.6.35-ARCH/drivers/s
  	  PODxt Pro by Line6 (and similar devices), supporting the
 diff -Nur linux-2.6.35/drivers/staging/panel/panel.c linux-2.6.35-ARCH/drivers/staging/panel/panel.c
 --- linux-2.6.35/drivers/staging/panel/panel.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/staging/panel/panel.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/staging/panel/panel.c	2010-08-20 21:24:47.000000000 +0000
 @@ -2179,6 +2179,7 @@
  		if (pprt) {
  			parport_release(pprt);
@@ -2930,7 +2938,7 @@ diff -Nur linux-2.6.35/drivers/staging/panel/panel.c linux-2.6.35-ARCH/drivers/s
  }
 diff -Nur linux-2.6.35/drivers/staging/rt2860/usb_main_dev.c linux-2.6.35-ARCH/drivers/staging/rt2860/usb_main_dev.c
 --- linux-2.6.35/drivers/staging/rt2860/usb_main_dev.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/staging/rt2860/usb_main_dev.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/staging/rt2860/usb_main_dev.c	2010-08-20 21:24:47.000000000 +0000
 @@ -64,6 +64,7 @@
  	{USB_DEVICE(0x14B2, 0x3C07)},	/* AL */
  	{USB_DEVICE(0x050D, 0x8053)},	/* Belkin */
@@ -2941,7 +2949,7 @@ diff -Nur linux-2.6.35/drivers/staging/rt2860/usb_main_dev.c linux-2.6.35-ARCH/d
  	{USB_DEVICE(0x07AA, 0x002F)},	/* Corega */
 diff -Nur linux-2.6.35/drivers/usb/core/hub.c linux-2.6.35-ARCH/drivers/usb/core/hub.c
 --- linux-2.6.35/drivers/usb/core/hub.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/core/hub.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/core/hub.c	2010-08-20 21:24:47.000000000 +0000
 @@ -20,6 +20,7 @@
  #include <linux/usb.h>
  #include <linux/usbdevice_fs.h>
@@ -2971,7 +2979,7 @@ diff -Nur linux-2.6.35/drivers/usb/core/hub.c linux-2.6.35-ARCH/drivers/usb/core
  		 * a "powered" LED, users should notice we didn't enable it
 diff -Nur linux-2.6.35/drivers/usb/core/quirks.c linux-2.6.35-ARCH/drivers/usb/core/quirks.c
 --- linux-2.6.35/drivers/usb/core/quirks.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/core/quirks.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/core/quirks.c	2010-08-20 21:24:47.000000000 +0000
 @@ -38,6 +38,9 @@
  	/* Creative SB Audigy 2 NX */
  	{ USB_DEVICE(0x041e, 0x3020), .driver_info = USB_QUIRK_RESET_RESUME },
@@ -2984,7 +2992,7 @@ diff -Nur linux-2.6.35/drivers/usb/core/quirks.c linux-2.6.35-ARCH/drivers/usb/c
  
 diff -Nur linux-2.6.35/drivers/usb/core/urb.c linux-2.6.35-ARCH/drivers/usb/core/urb.c
 --- linux-2.6.35/drivers/usb/core/urb.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/core/urb.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/core/urb.c	2010-08-20 21:24:47.000000000 +0000
 @@ -137,6 +137,16 @@
  }
  EXPORT_SYMBOL_GPL(usb_anchor_urb);
@@ -3080,7 +3088,7 @@ diff -Nur linux-2.6.35/drivers/usb/core/urb.c linux-2.6.35-ARCH/drivers/usb/core
  }
 diff -Nur linux-2.6.35/drivers/usb/host/ehci.h linux-2.6.35-ARCH/drivers/usb/host/ehci.h
 --- linux-2.6.35/drivers/usb/host/ehci.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/host/ehci.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/host/ehci.h	2010-08-20 21:24:47.000000000 +0000
 @@ -130,6 +130,7 @@
  	unsigned		has_amcc_usb23:1;
  	unsigned		need_io_watchdog:1;
@@ -3091,7 +3099,7 @@ diff -Nur linux-2.6.35/drivers/usb/host/ehci.h linux-2.6.35-ARCH/drivers/usb/hos
  	#define OHCI_CTRL_HCFS          (3 << 6)
 diff -Nur linux-2.6.35/drivers/usb/host/ehci-pci.c linux-2.6.35-ARCH/drivers/usb/host/ehci-pci.c
 --- linux-2.6.35/drivers/usb/host/ehci-pci.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/host/ehci-pci.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/host/ehci-pci.c	2010-08-20 21:24:47.000000000 +0000
 @@ -114,6 +114,7 @@
  		break;
  	case PCI_VENDOR_ID_INTEL:
@@ -3102,7 +3110,7 @@ diff -Nur linux-2.6.35/drivers/usb/host/ehci-pci.c linux-2.6.35-ARCH/drivers/usb
  			ehci_info(ehci, "using broken periodic workaround\n");
 diff -Nur linux-2.6.35/drivers/usb/host/ehci-sched.c linux-2.6.35-ARCH/drivers/usb/host/ehci-sched.c
 --- linux-2.6.35/drivers/usb/host/ehci-sched.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/host/ehci-sched.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/host/ehci-sched.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1400,7 +1400,6 @@
  	int			status;
  	unsigned		mod = ehci->periodic_size << 3;
@@ -3133,7 +3141,7 @@ diff -Nur linux-2.6.35/drivers/usb/host/ehci-sched.c linux-2.6.35-ARCH/drivers/u
  			next = now;
 diff -Nur linux-2.6.35/drivers/usb/misc/usbtest.c linux-2.6.35-ARCH/drivers/usb/misc/usbtest.c
 --- linux-2.6.35/drivers/usb/misc/usbtest.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/misc/usbtest.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/misc/usbtest.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1378,7 +1378,6 @@
  			break;
  		}
@@ -3163,7 +3171,7 @@ diff -Nur linux-2.6.35/drivers/usb/misc/usbtest.c linux-2.6.35-ARCH/drivers/usb/
  	 * arbitrary limit, we will report an error if any submissions
 diff -Nur linux-2.6.35/drivers/usb/mon/mon_bin.c linux-2.6.35-ARCH/drivers/usb/mon/mon_bin.c
 --- linux-2.6.35/drivers/usb/mon/mon_bin.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/mon/mon_bin.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/mon/mon_bin.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1009,7 +1009,7 @@
  
  		mutex_lock(&rp->fetch_lock);
@@ -3175,7 +3183,7 @@ diff -Nur linux-2.6.35/drivers/usb/mon/mon_bin.c linux-2.6.35-ARCH/drivers/usb/m
  		rp->b_size = size;
 diff -Nur linux-2.6.35/drivers/usb/musb/musb_debugfs.c linux-2.6.35-ARCH/drivers/usb/musb/musb_debugfs.c
 --- linux-2.6.35/drivers/usb/musb/musb_debugfs.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/musb/musb_debugfs.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/musb/musb_debugfs.c	2010-08-20 21:24:47.000000000 +0000
 @@ -92,29 +92,29 @@
  	{ "LS_EOF1",		0x7E,	8 },
  	{ "SOFT_RST",		0x7F,	8 },
@@ -3224,7 +3232,7 @@ diff -Nur linux-2.6.35/drivers/usb/musb/musb_debugfs.c linux-2.6.35-ARCH/drivers
  
 diff -Nur linux-2.6.35/drivers/usb/serial/cp210x.c linux-2.6.35-ARCH/drivers/usb/serial/cp210x.c
 --- linux-2.6.35/drivers/usb/serial/cp210x.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/serial/cp210x.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/serial/cp210x.c	2010-08-20 21:24:47.000000000 +0000
 @@ -126,6 +126,10 @@
  	{ USB_DEVICE(0x1843, 0x0200) }, /* Vaisala USB Instrument Cable */
  	{ USB_DEVICE(0x18EF, 0xE00F) }, /* ELV USB-I2C-Interface */
@@ -3238,7 +3246,7 @@ diff -Nur linux-2.6.35/drivers/usb/serial/cp210x.c linux-2.6.35-ARCH/drivers/usb
  
 diff -Nur linux-2.6.35/drivers/usb/serial/ftdi_sio.c linux-2.6.35-ARCH/drivers/usb/serial/ftdi_sio.c
 --- linux-2.6.35/drivers/usb/serial/ftdi_sio.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/serial/ftdi_sio.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/serial/ftdi_sio.c	2010-08-20 21:24:47.000000000 +0000
 @@ -157,6 +157,9 @@
  	{ USB_DEVICE(FTDI_VID, FTDI_SCS_DEVICE_5_PID) },
  	{ USB_DEVICE(FTDI_VID, FTDI_SCS_DEVICE_6_PID) },
@@ -3259,7 +3267,7 @@ diff -Nur linux-2.6.35/drivers/usb/serial/ftdi_sio.c linux-2.6.35-ARCH/drivers/u
  };
 diff -Nur linux-2.6.35/drivers/usb/serial/ftdi_sio_ids.h linux-2.6.35-ARCH/drivers/usb/serial/ftdi_sio_ids.h
 --- linux-2.6.35/drivers/usb/serial/ftdi_sio_ids.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/serial/ftdi_sio_ids.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/serial/ftdi_sio_ids.h	2010-08-20 21:24:47.000000000 +0000
 @@ -40,6 +40,11 @@
  
  #define FTDI_NXTCAM_PID		0xABB8 /* NXTCam for Mindstorms NXT */
@@ -3283,7 +3291,7 @@ diff -Nur linux-2.6.35/drivers/usb/serial/ftdi_sio_ids.h linux-2.6.35-ARCH/drive
 +#define SEGWAY_RMP200_PID	0xe729
 diff -Nur linux-2.6.35/drivers/usb/serial/generic.c linux-2.6.35-ARCH/drivers/usb/serial/generic.c
 --- linux-2.6.35/drivers/usb/serial/generic.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/serial/generic.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/serial/generic.c	2010-08-20 21:24:47.000000000 +0000
 @@ -208,18 +208,23 @@
  	urb->transfer_buffer_length = count;
  	usb_serial_debug_data(debug, &port->dev, __func__, count,
@@ -3315,7 +3323,7 @@ diff -Nur linux-2.6.35/drivers/usb/serial/generic.c linux-2.6.35-ARCH/drivers/us
  	 * there will be no free urb). */
 diff -Nur linux-2.6.35/drivers/usb/serial/option.c linux-2.6.35-ARCH/drivers/usb/serial/option.c
 --- linux-2.6.35/drivers/usb/serial/option.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/usb/serial/option.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/usb/serial/option.c	2010-08-20 21:24:47.000000000 +0000
 @@ -145,7 +145,10 @@
  #define HUAWEI_PRODUCT_E143D			0x143D
  #define HUAWEI_PRODUCT_E143E			0x143E
@@ -3353,7 +3361,7 @@ diff -Nur linux-2.6.35/drivers/usb/serial/option.c linux-2.6.35-ARCH/drivers/usb
  	if (!data)
 diff -Nur linux-2.6.35/drivers/video/logo/logo_linux_clut224.ppm linux-2.6.35-ARCH/drivers/video/logo/logo_linux_clut224.ppm
 --- linux-2.6.35/drivers/video/logo/logo_linux_clut224.ppm	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/video/logo/logo_linux_clut224.ppm	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/video/logo/logo_linux_clut224.ppm	2010-08-20 21:24:47.000000000 +0000
 @@ -1,1604 +1,883 @@
  P3
 -# Standard 224-color Linux logo
@@ -5841,7 +5849,7 @@ diff -Nur linux-2.6.35/drivers/video/logo/logo_linux_clut224.ppm linux-2.6.35-AR
 +
 diff -Nur linux-2.6.35/drivers/video/logo/logo_linux_mono.pbm linux-2.6.35-ARCH/drivers/video/logo/logo_linux_mono.pbm
 --- linux-2.6.35/drivers/video/logo/logo_linux_mono.pbm	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/video/logo/logo_linux_mono.pbm	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/video/logo/logo_linux_mono.pbm	2010-08-20 21:24:47.000000000 +0000
 @@ -1,203 +1,323 @@
 -P1
 -# Standard black and white Linux logo
@@ -6370,7 +6378,7 @@ diff -Nur linux-2.6.35/drivers/video/logo/logo_linux_mono.pbm linux-2.6.35-ARCH/
 +0 0 
 diff -Nur linux-2.6.35/drivers/video/logo/logo_linux_vga16.ppm linux-2.6.35-ARCH/drivers/video/logo/logo_linux_vga16.ppm
 --- linux-2.6.35/drivers/video/logo/logo_linux_vga16.ppm	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/video/logo/logo_linux_vga16.ppm	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/video/logo/logo_linux_vga16.ppm	2010-08-20 21:24:47.000000000 +0000
 @@ -1,1604 +1,323 @@
 -P3
 -# Standard 16-color Linux logo
@@ -8299,7 +8307,7 @@ diff -Nur linux-2.6.35/drivers/video/logo/logo_linux_vga16.ppm linux-2.6.35-ARCH
 +0 0 
 diff -Nur linux-2.6.35/drivers/video/w100fb.c linux-2.6.35-ARCH/drivers/video/w100fb.c
 --- linux-2.6.35/drivers/video/w100fb.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/video/w100fb.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/video/w100fb.c	2010-08-20 21:24:47.000000000 +0000
 @@ -858,9 +858,9 @@
  void w100fb_gpio_write(int port, unsigned long value)
  {
@@ -8314,7 +8322,7 @@ diff -Nur linux-2.6.35/drivers/video/w100fb.c linux-2.6.35-ARCH/drivers/video/w1
  EXPORT_SYMBOL(w100fb_gpio_write);
 diff -Nur linux-2.6.35/drivers/xen/events.c linux-2.6.35-ARCH/drivers/xen/events.c
 --- linux-2.6.35/drivers/xen/events.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/drivers/xen/events.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/drivers/xen/events.c	2010-08-20 21:24:47.000000000 +0000
 @@ -536,6 +536,7 @@
  	if (irq < 0)
  		return irq;
@@ -8325,7 +8333,7 @@ diff -Nur linux-2.6.35/drivers/xen/events.c linux-2.6.35-ARCH/drivers/xen/events
  		unbind_from_irq(irq);
 diff -Nur linux-2.6.35/fs/block_dev.c linux-2.6.35-ARCH/fs/block_dev.c
 --- linux-2.6.35/fs/block_dev.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/block_dev.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/block_dev.c	2010-08-20 21:24:47.000000000 +0000
 @@ -681,8 +681,8 @@
  	if (!bd_may_claim(bdev, whole, holder))
  		return -EBUSY;
@@ -8356,7 +8364,7 @@ diff -Nur linux-2.6.35/fs/block_dev.c linux-2.6.35-ARCH/fs/block_dev.c
  	lock_kernel();
 diff -Nur linux-2.6.35/fs/ecryptfs/file.c linux-2.6.35-ARCH/fs/ecryptfs/file.c
 --- linux-2.6.35/fs/ecryptfs/file.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/ecryptfs/file.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/ecryptfs/file.c	2010-08-20 21:24:47.000000000 +0000
 @@ -199,7 +199,7 @@
  			       "the persistent file for the dentry with name "
  			       "[%s]; rc = [%d]\n", __func__,
@@ -8454,7 +8462,7 @@ diff -Nur linux-2.6.35/fs/ecryptfs/file.c linux-2.6.35-ARCH/fs/ecryptfs/file.c
 -}
 diff -Nur linux-2.6.35/fs/ecryptfs/inode.c linux-2.6.35-ARCH/fs/ecryptfs/inode.c
 --- linux-2.6.35/fs/ecryptfs/inode.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/ecryptfs/inode.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/ecryptfs/inode.c	2010-08-20 21:24:47.000000000 +0000
 @@ -264,7 +264,7 @@
  		printk(KERN_ERR "%s: Out of memory whilst attempting "
  		       "to allocate ecryptfs_dentry_info struct\n",
@@ -8477,7 +8485,7 @@ diff -Nur linux-2.6.35/fs/ecryptfs/inode.c linux-2.6.35-ARCH/fs/ecryptfs/inode.c
  	return rc;
 diff -Nur linux-2.6.35/fs/ext4/super.c linux-2.6.35-ARCH/fs/ext4/super.c
 --- linux-2.6.35/fs/ext4/super.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/ext4/super.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/ext4/super.c	2010-08-20 21:24:47.000000000 +0000
 @@ -241,7 +241,7 @@
  	if (sb->s_flags & MS_RDONLY)
  		return ERR_PTR(-EROFS);
@@ -8498,7 +8506,7 @@ diff -Nur linux-2.6.35/fs/ext4/super.c linux-2.6.35-ARCH/fs/ext4/super.c
  
 diff -Nur linux-2.6.35/fs/jfs/xattr.c linux-2.6.35-ARCH/fs/jfs/xattr.c
 --- linux-2.6.35/fs/jfs/xattr.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/jfs/xattr.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/jfs/xattr.c	2010-08-20 21:24:47.000000000 +0000
 @@ -86,46 +86,25 @@
  #define EA_MALLOC	0x0008
  
@@ -8636,7 +8644,7 @@ diff -Nur linux-2.6.35/fs/jfs/xattr.c linux-2.6.35-ARCH/fs/jfs/xattr.c
  	return err;
 diff -Nur linux-2.6.35/fs/namei.c linux-2.6.35-ARCH/fs/namei.c
 --- linux-2.6.35/fs/namei.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/namei.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/namei.c	2010-08-20 21:24:47.000000000 +0000
 @@ -348,6 +348,7 @@
  
  	return 0;
@@ -8675,7 +8683,7 @@ diff -Nur linux-2.6.35/fs/namei.c linux-2.6.35-ARCH/fs/namei.c
   * lookup_one_len - filesystem helper to lookup single pathname component
 diff -Nur linux-2.6.35/fs/namespace.c linux-2.6.35-ARCH/fs/namespace.c
 --- linux-2.6.35/fs/namespace.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/namespace.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/namespace.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1279,6 +1279,7 @@
  	}
  	return 0;
@@ -8695,7 +8703,7 @@ diff -Nur linux-2.6.35/fs/namespace.c linux-2.6.35-ARCH/fs/namespace.c
  
 diff -Nur linux-2.6.35/fs/notify/group.c linux-2.6.35-ARCH/fs/notify/group.c
 --- linux-2.6.35/fs/notify/group.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/notify/group.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/notify/group.c	2010-08-20 21:24:47.000000000 +0000
 @@ -22,6 +22,7 @@
  #include <linux/srcu.h>
  #include <linux/rculist.h>
@@ -8719,7 +8727,7 @@ diff -Nur linux-2.6.35/fs/notify/group.c linux-2.6.35-ARCH/fs/notify/group.c
 +EXPORT_SYMBOL(fsnotify_obtain_group);
 diff -Nur linux-2.6.35/fs/notify/inode_mark.c linux-2.6.35-ARCH/fs/notify/inode_mark.c
 --- linux-2.6.35/fs/notify/inode_mark.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/notify/inode_mark.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/notify/inode_mark.c	2010-08-20 21:24:47.000000000 +0000
 @@ -105,6 +105,7 @@
  	if (atomic_dec_and_test(&entry->refcnt))
  		entry->free_mark(entry);
@@ -8762,7 +8770,7 @@ diff -Nur linux-2.6.35/fs/notify/inode_mark.c linux-2.6.35-ARCH/fs/notify/inode_
   * fsnotify_unmount_inodes - an sb is unmounting.  handle any watched inodes.
 diff -Nur linux-2.6.35/fs/open.c linux-2.6.35-ARCH/fs/open.c
 --- linux-2.6.35/fs/open.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/open.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/open.c	2010-08-20 21:24:47.000000000 +0000
 @@ -59,6 +59,7 @@
  	mutex_unlock(&dentry->d_inode->i_mutex);
  	return ret;
@@ -8771,9 +8779,35 @@ diff -Nur linux-2.6.35/fs/open.c linux-2.6.35-ARCH/fs/open.c
  
  static long do_sys_truncate(const char __user *pathname, loff_t length)
  {
+diff -Nur linux-2.6.35/fs/proc/task_mmu.c linux-2.6.35-ARCH/fs/proc/task_mmu.c
+--- linux-2.6.35/fs/proc/task_mmu.c	2010-08-01 22:11:14.000000000 +0000
++++ linux-2.6.35-ARCH/fs/proc/task_mmu.c	2010-08-20 21:24:47.000000000 +0000
+@@ -210,6 +210,7 @@
+ 	int flags = vma->vm_flags;
+ 	unsigned long ino = 0;
+ 	unsigned long long pgoff = 0;
++	unsigned long start;
+ 	dev_t dev = 0;
+ 	int len;
+ 
+@@ -220,8 +221,13 @@
+ 		pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
+ 	}
+ 
++	/* We don't show the stack guard page in /proc/maps */
++	start = vma->vm_start;
++	if (vma->vm_flags & VM_GROWSDOWN)
++		start += PAGE_SIZE;
++
+ 	seq_printf(m, "%08lx-%08lx %c%c%c%c %08llx %02x:%02x %lu %n",
+-			vma->vm_start,
++			start,
+ 			vma->vm_end,
+ 			flags & VM_READ ? 'r' : '-',
+ 			flags & VM_WRITE ? 'w' : '-',
 diff -Nur linux-2.6.35/fs/signalfd.c linux-2.6.35-ARCH/fs/signalfd.c
 --- linux-2.6.35/fs/signalfd.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/signalfd.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/signalfd.c	2010-08-20 21:24:47.000000000 +0000
 @@ -88,6 +88,7 @@
  		 err |= __put_user(kinfo->si_tid, &uinfo->ssi_tid);
  		 err |= __put_user(kinfo->si_overrun, &uinfo->ssi_overrun);
@@ -8792,7 +8826,7 @@ diff -Nur linux-2.6.35/fs/signalfd.c linux-2.6.35-ARCH/fs/signalfd.c
  		/*
 diff -Nur linux-2.6.35/fs/splice.c linux-2.6.35-ARCH/fs/splice.c
 --- linux-2.6.35/fs/splice.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/splice.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/splice.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1104,8 +1104,8 @@
  /*
   * Attempt to initiate a splice from pipe to file.
@@ -8832,7 +8866,7 @@ diff -Nur linux-2.6.35/fs/splice.c linux-2.6.35-ARCH/fs/splice.c
   * splice_direct_to_actor - splices data directly between two non-pipes
 diff -Nur linux-2.6.35/fs/squashfs/decompressor.c linux-2.6.35-ARCH/fs/squashfs/decompressor.c
 --- linux-2.6.35/fs/squashfs/decompressor.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/squashfs/decompressor.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/squashfs/decompressor.c	2010-08-20 21:24:47.000000000 +0000
 @@ -50,7 +50,11 @@
  
  static const struct squashfs_decompressor *decompressor[] = {
@@ -8847,7 +8881,7 @@ diff -Nur linux-2.6.35/fs/squashfs/decompressor.c linux-2.6.35-ARCH/fs/squashfs/
  };
 diff -Nur linux-2.6.35/fs/squashfs/Kconfig linux-2.6.35-ARCH/fs/squashfs/Kconfig
 --- linux-2.6.35/fs/squashfs/Kconfig	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/squashfs/Kconfig	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/squashfs/Kconfig	2010-08-20 21:24:47.000000000 +0000
 @@ -37,6 +37,12 @@
  
  	  If unsure, say N.
@@ -8863,7 +8897,7 @@ diff -Nur linux-2.6.35/fs/squashfs/Kconfig linux-2.6.35-ARCH/fs/squashfs/Kconfig
  	bool "Additional option for memory-constrained systems" 
 diff -Nur linux-2.6.35/fs/squashfs/lzma_wrapper.c linux-2.6.35-ARCH/fs/squashfs/lzma_wrapper.c
 --- linux-2.6.35/fs/squashfs/lzma_wrapper.c	1970-01-01 00:00:00.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/squashfs/lzma_wrapper.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/squashfs/lzma_wrapper.c	2010-08-20 21:24:47.000000000 +0000
 @@ -0,0 +1,152 @@
 +/*
 + * Squashfs - a compressed read only filesystem for Linux
@@ -9019,7 +9053,7 @@ diff -Nur linux-2.6.35/fs/squashfs/lzma_wrapper.c linux-2.6.35-ARCH/fs/squashfs/
 +
 diff -Nur linux-2.6.35/fs/squashfs/Makefile linux-2.6.35-ARCH/fs/squashfs/Makefile
 --- linux-2.6.35/fs/squashfs/Makefile	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/squashfs/Makefile	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/squashfs/Makefile	2010-08-20 21:24:47.000000000 +0000
 @@ -6,4 +6,4 @@
  squashfs-y += block.o cache.o dir.o export.o file.o fragment.o id.o inode.o
  squashfs-y += namei.o super.o symlink.o zlib_wrapper.o decompressor.o
@@ -9028,7 +9062,7 @@ diff -Nur linux-2.6.35/fs/squashfs/Makefile linux-2.6.35-ARCH/fs/squashfs/Makefi
 +squashfs-$(CONFIG_SQUASHFS_LZMA) += lzma_wrapper.o
 diff -Nur linux-2.6.35/fs/squashfs/squashfs.h linux-2.6.35-ARCH/fs/squashfs/squashfs.h
 --- linux-2.6.35/fs/squashfs/squashfs.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/squashfs/squashfs.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/squashfs/squashfs.h	2010-08-20 21:24:47.000000000 +0000
 @@ -104,3 +104,6 @@
  
  /* zlib_wrapper.c */
@@ -9038,7 +9072,7 @@ diff -Nur linux-2.6.35/fs/squashfs/squashfs.h linux-2.6.35-ARCH/fs/squashfs/squa
 +extern const struct squashfs_decompressor squashfs_lzma_comp_ops;
 diff -Nur linux-2.6.35/fs/super.c linux-2.6.35-ARCH/fs/super.c
 --- linux-2.6.35/fs/super.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/fs/super.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/fs/super.c	2010-08-20 21:24:47.000000000 +0000
 @@ -305,8 +305,13 @@
  			if (s) {
  				up_write(&s->s_umount);
@@ -9063,7 +9097,7 @@ diff -Nur linux-2.6.35/fs/super.c linux-2.6.35-ARCH/fs/super.c
  	if (error)
 diff -Nur linux-2.6.35/include/drm/drm_pciids.h linux-2.6.35-ARCH/include/drm/drm_pciids.h
 --- linux-2.6.35/include/drm/drm_pciids.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/drm/drm_pciids.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/drm/drm_pciids.h	2010-08-20 21:24:47.000000000 +0000
 @@ -146,6 +146,8 @@
  	{0x1002, 0x6888, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CHIP_CYPRESS|RADEON_NEW_MEMMAP}, \
  	{0x1002, 0x6889, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CHIP_CYPRESS|RADEON_NEW_MEMMAP}, \
@@ -9115,7 +9149,7 @@ diff -Nur linux-2.6.35/include/drm/drm_pciids.h linux-2.6.35-ARCH/include/drm/dr
  	{0x1002, 0x9583, PCI_ANY_ID, PCI_ANY_ID, 0, 0, CHIP_RV630|RADEON_IS_MOBILITY|RADEON_NEW_MEMMAP}, \
 diff -Nur linux-2.6.35/include/linux/decompress/bunzip2_mm.h linux-2.6.35-ARCH/include/linux/decompress/bunzip2_mm.h
 --- linux-2.6.35/include/linux/decompress/bunzip2_mm.h	1970-01-01 00:00:00.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/decompress/bunzip2_mm.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/decompress/bunzip2_mm.h	2010-08-20 21:24:47.000000000 +0000
 @@ -0,0 +1,13 @@
 +#ifndef BUNZIP2_MM_H
 +#define BUNZIP2_MM_H
@@ -9132,7 +9166,7 @@ diff -Nur linux-2.6.35/include/linux/decompress/bunzip2_mm.h linux-2.6.35-ARCH/i
 +#endif
 diff -Nur linux-2.6.35/include/linux/decompress/inflate_mm.h linux-2.6.35-ARCH/include/linux/decompress/inflate_mm.h
 --- linux-2.6.35/include/linux/decompress/inflate_mm.h	1970-01-01 00:00:00.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/decompress/inflate_mm.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/decompress/inflate_mm.h	2010-08-20 21:24:47.000000000 +0000
 @@ -0,0 +1,13 @@
 +#ifndef INFLATE_MM_H
 +#define INFLATE_MM_H
@@ -9149,7 +9183,7 @@ diff -Nur linux-2.6.35/include/linux/decompress/inflate_mm.h linux-2.6.35-ARCH/i
 +#endif
 diff -Nur linux-2.6.35/include/linux/decompress/mm.h linux-2.6.35-ARCH/include/linux/decompress/mm.h
 --- linux-2.6.35/include/linux/decompress/mm.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/decompress/mm.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/decompress/mm.h	2010-08-20 21:24:47.000000000 +0000
 @@ -63,8 +63,6 @@
  
  #define set_error_fn(x)
@@ -9172,7 +9206,7 @@ diff -Nur linux-2.6.35/include/linux/decompress/mm.h linux-2.6.35-ARCH/include/l
  #include <linux/init.h>
 diff -Nur linux-2.6.35/include/linux/decompress/unlzma_mm.h linux-2.6.35-ARCH/include/linux/decompress/unlzma_mm.h
 --- linux-2.6.35/include/linux/decompress/unlzma_mm.h	1970-01-01 00:00:00.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/decompress/unlzma_mm.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/decompress/unlzma_mm.h	2010-08-20 21:24:47.000000000 +0000
 @@ -0,0 +1,20 @@
 +#ifndef UNLZMA_MM_H
 +#define UNLZMA_MM_H
@@ -9196,7 +9230,7 @@ diff -Nur linux-2.6.35/include/linux/decompress/unlzma_mm.h linux-2.6.35-ARCH/in
 +#endif
 diff -Nur linux-2.6.35/include/linux/decompress/unlzo_mm.h linux-2.6.35-ARCH/include/linux/decompress/unlzo_mm.h
 --- linux-2.6.35/include/linux/decompress/unlzo_mm.h	1970-01-01 00:00:00.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/decompress/unlzo_mm.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/decompress/unlzo_mm.h	2010-08-20 21:24:47.000000000 +0000
 @@ -0,0 +1,13 @@
 +#ifndef UNLZO_MM_H
 +#define UNLZO_MM_H
@@ -9213,7 +9247,7 @@ diff -Nur linux-2.6.35/include/linux/decompress/unlzo_mm.h linux-2.6.35-ARCH/inc
 +#endif
 diff -Nur linux-2.6.35/include/linux/fs.h linux-2.6.35-ARCH/include/linux/fs.h
 --- linux-2.6.35/include/linux/fs.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/fs.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/fs.h	2010-08-20 21:24:47.000000000 +0000
 @@ -145,11 +145,11 @@
   *
   */
@@ -9239,7 +9273,7 @@ diff -Nur linux-2.6.35/include/linux/fs.h linux-2.6.35-ARCH/include/linux/fs.h
  
 diff -Nur linux-2.6.35/include/linux/interrupt.h linux-2.6.35-ARCH/include/linux/interrupt.h
 --- linux-2.6.35/include/linux/interrupt.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/interrupt.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/interrupt.h	2010-08-20 21:24:47.000000000 +0000
 @@ -53,16 +53,21 @@
   * IRQF_ONESHOT - Interrupt is not reenabled after the hardirq handler finished.
   *                Used by threaded interrupts which need to keep the
@@ -9265,7 +9299,7 @@ diff -Nur linux-2.6.35/include/linux/interrupt.h linux-2.6.35-ARCH/include/linux
   * Bits used by threaded handlers:
 diff -Nur linux-2.6.35/include/linux/Kbuild linux-2.6.35-ARCH/include/linux/Kbuild
 --- linux-2.6.35/include/linux/Kbuild	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/Kbuild	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/Kbuild	2010-08-20 21:24:47.000000000 +0000
 @@ -276,6 +276,7 @@
  		  $(srctree)/include/asm-$(SRCARCH)/kvm_para.h),)
  unifdef-y += kvm_para.h
@@ -9276,7 +9310,7 @@ diff -Nur linux-2.6.35/include/linux/Kbuild linux-2.6.35-ARCH/include/linux/Kbui
  unifdef-y += lp.h
 diff -Nur linux-2.6.35/include/linux/namei.h linux-2.6.35-ARCH/include/linux/namei.h
 --- linux-2.6.35/include/linux/namei.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/namei.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/namei.h	2010-08-20 21:24:47.000000000 +0000
 @@ -73,6 +73,9 @@
  extern struct file *lookup_instantiate_filp(struct nameidata *nd, struct dentry *dentry,
  		int (*open)(struct inode *, struct file *));
@@ -9289,7 +9323,7 @@ diff -Nur linux-2.6.35/include/linux/namei.h linux-2.6.35-ARCH/include/linux/nam
  extern int follow_down(struct path *);
 diff -Nur linux-2.6.35/include/linux/netdevice.h linux-2.6.35-ARCH/include/linux/netdevice.h
 --- linux-2.6.35/include/linux/netdevice.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/netdevice.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/netdevice.h	2010-08-20 21:24:47.000000000 +0000
 @@ -1775,6 +1775,8 @@
  
  extern void netif_carrier_off(struct net_device *dev);
@@ -9301,7 +9335,7 @@ diff -Nur linux-2.6.35/include/linux/netdevice.h linux-2.6.35-ARCH/include/linux
   *	@dev: network device
 diff -Nur linux-2.6.35/include/linux/notifier.h linux-2.6.35-ARCH/include/linux/notifier.h
 --- linux-2.6.35/include/linux/notifier.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/notifier.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/notifier.h	2010-08-20 21:24:47.000000000 +0000
 @@ -210,6 +210,7 @@
  #define NETDEV_POST_INIT	0x0010
  #define NETDEV_UNREGISTER_BATCH 0x0011
@@ -9312,7 +9346,7 @@ diff -Nur linux-2.6.35/include/linux/notifier.h linux-2.6.35-ARCH/include/linux/
  #define SYS_RESTART	SYS_DOWN
 diff -Nur linux-2.6.35/include/linux/sched.h linux-2.6.35-ARCH/include/linux/sched.h
 --- linux-2.6.35/include/linux/sched.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/sched.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/sched.h	2010-08-20 21:24:47.000000000 +0000
 @@ -274,17 +274,11 @@
  #if defined(CONFIG_SMP) && defined(CONFIG_NO_HZ)
  extern int select_nohz_load_balancer(int cpu);
@@ -9333,7 +9367,7 @@ diff -Nur linux-2.6.35/include/linux/sched.h linux-2.6.35-ARCH/include/linux/sch
  /*
 diff -Nur linux-2.6.35/include/linux/splice.h linux-2.6.35-ARCH/include/linux/splice.h
 --- linux-2.6.35/include/linux/splice.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/splice.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/splice.h	2010-08-20 21:24:47.000000000 +0000
 @@ -89,4 +89,10 @@
  extern void splice_shrink_spd(struct pipe_inode_info *,
  				struct splice_pipe_desc *);
@@ -9347,7 +9381,7 @@ diff -Nur linux-2.6.35/include/linux/splice.h linux-2.6.35-ARCH/include/linux/sp
  #endif
 diff -Nur linux-2.6.35/include/linux/usb/quirks.h linux-2.6.35-ARCH/include/linux/usb/quirks.h
 --- linux-2.6.35/include/linux/usb/quirks.h	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/include/linux/usb/quirks.h	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/include/linux/usb/quirks.h	2010-08-20 21:24:47.000000000 +0000
 @@ -26,4 +26,8 @@
     and can't handle talking to these interfaces */
  #define USB_QUIRK_HONOR_BNUMINTERFACES	0x00000020
@@ -9359,7 +9393,7 @@ diff -Nur linux-2.6.35/include/linux/usb/quirks.h linux-2.6.35-ARCH/include/linu
  #endif /* __LINUX_USB_QUIRKS_H */
 diff -Nur linux-2.6.35/kernel/irq/manage.c linux-2.6.35-ARCH/kernel/irq/manage.c
 --- linux-2.6.35/kernel/irq/manage.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/kernel/irq/manage.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/kernel/irq/manage.c	2010-08-20 21:24:47.000000000 +0000
 @@ -216,7 +216,7 @@
  void __disable_irq(struct irq_desc *desc, unsigned int irq, bool suspend)
  {
@@ -9371,7 +9405,7 @@ diff -Nur linux-2.6.35/kernel/irq/manage.c linux-2.6.35-ARCH/kernel/irq/manage.c
  	}
 diff -Nur linux-2.6.35/kernel/sched.c linux-2.6.35-ARCH/kernel/sched.c
 --- linux-2.6.35/kernel/sched.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/kernel/sched.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/kernel/sched.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1232,16 +1232,6 @@
  		smp_send_reschedule(cpu);
  }
@@ -9391,7 +9425,7 @@ diff -Nur linux-2.6.35/kernel/sched.c linux-2.6.35-ARCH/kernel/sched.c
  static u64 sched_avg_period(void)
 diff -Nur linux-2.6.35/kernel/signal.c linux-2.6.35-ARCH/kernel/signal.c
 --- linux-2.6.35/kernel/signal.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/kernel/signal.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/kernel/signal.c	2010-08-20 21:24:47.000000000 +0000
 @@ -637,7 +637,7 @@
  
  /*
@@ -9420,7 +9454,7 @@ diff -Nur linux-2.6.35/kernel/signal.c linux-2.6.35-ARCH/kernel/signal.c
  		ret = do_send_sig_info(sig, info, p, true);
 diff -Nur linux-2.6.35/kernel/time/tick-sched.c linux-2.6.35-ARCH/kernel/time/tick-sched.c
 --- linux-2.6.35/kernel/time/tick-sched.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/kernel/time/tick-sched.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/kernel/time/tick-sched.c	2010-08-20 21:24:47.000000000 +0000
 @@ -325,7 +325,7 @@
  	} while (read_seqretry(&xtime_lock, seq));
  
@@ -9432,7 +9466,7 @@ diff -Nur linux-2.6.35/kernel/time/tick-sched.c linux-2.6.35-ARCH/kernel/time/ti
  	} else {
 diff -Nur linux-2.6.35/lib/decompress_bunzip2.c linux-2.6.35-ARCH/lib/decompress_bunzip2.c
 --- linux-2.6.35/lib/decompress_bunzip2.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/lib/decompress_bunzip2.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/lib/decompress_bunzip2.c	2010-08-20 21:24:47.000000000 +0000
 @@ -52,6 +52,7 @@
  #include <linux/slab.h>
  #endif /* STATIC */
@@ -9443,7 +9477,7 @@ diff -Nur linux-2.6.35/lib/decompress_bunzip2.c linux-2.6.35-ARCH/lib/decompress
  #ifndef INT_MAX
 diff -Nur linux-2.6.35/lib/decompress_inflate.c linux-2.6.35-ARCH/lib/decompress_inflate.c
 --- linux-2.6.35/lib/decompress_inflate.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/lib/decompress_inflate.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/lib/decompress_inflate.c	2010-08-20 21:24:47.000000000 +0000
 @@ -23,6 +23,7 @@
  
  #endif /* STATIC */
@@ -9454,7 +9488,7 @@ diff -Nur linux-2.6.35/lib/decompress_inflate.c linux-2.6.35-ARCH/lib/decompress
  #define GZIP_IOBUF_SIZE (16*1024)
 diff -Nur linux-2.6.35/lib/decompress_unlzma.c linux-2.6.35-ARCH/lib/decompress_unlzma.c
 --- linux-2.6.35/lib/decompress_unlzma.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/lib/decompress_unlzma.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/lib/decompress_unlzma.c	2010-08-20 21:24:47.000000000 +0000
 @@ -36,6 +36,7 @@
  #include <linux/slab.h>
  #endif /* STATIC */
@@ -9771,7 +9805,7 @@ diff -Nur linux-2.6.35/lib/decompress_unlzma.c linux-2.6.35-ARCH/lib/decompress_
  STATIC int INIT decompress(unsigned char *buf, int in_len,
 diff -Nur linux-2.6.35/lib/decompress_unlzo.c linux-2.6.35-ARCH/lib/decompress_unlzo.c
 --- linux-2.6.35/lib/decompress_unlzo.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/lib/decompress_unlzo.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/lib/decompress_unlzo.c	2010-08-20 21:24:47.000000000 +0000
 @@ -39,6 +39,7 @@
  
  #include <linux/types.h>
@@ -9782,7 +9816,7 @@ diff -Nur linux-2.6.35/lib/decompress_unlzo.c linux-2.6.35-ARCH/lib/decompress_u
  #include <linux/compiler.h>
 diff -Nur linux-2.6.35/lib/Kconfig linux-2.6.35-ARCH/lib/Kconfig
 --- linux-2.6.35/lib/Kconfig	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/lib/Kconfig	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/lib/Kconfig	2010-08-20 21:24:47.000000000 +0000
 @@ -121,6 +121,9 @@
  	select LZO_DECOMPRESS
  	tristate
@@ -9795,7 +9829,7 @@ diff -Nur linux-2.6.35/lib/Kconfig linux-2.6.35-ARCH/lib/Kconfig
  #
 diff -Nur linux-2.6.35/lib/Makefile linux-2.6.35-ARCH/lib/Makefile
 --- linux-2.6.35/lib/Makefile	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/lib/Makefile	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/lib/Makefile	2010-08-20 21:24:47.000000000 +0000
 @@ -72,7 +72,7 @@
  
  lib-$(CONFIG_DECOMPRESS_GZIP) += decompress_inflate.o
@@ -9807,7 +9841,7 @@ diff -Nur linux-2.6.35/lib/Makefile linux-2.6.35-ARCH/lib/Makefile
  obj-$(CONFIG_TEXTSEARCH) += textsearch.o
 diff -Nur linux-2.6.35/Makefile linux-2.6.35-ARCH/Makefile
 --- linux-2.6.35/Makefile	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/Makefile	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/Makefile	2010-08-20 21:24:47.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
@@ -9819,7 +9853,7 @@ diff -Nur linux-2.6.35/Makefile linux-2.6.35-ARCH/Makefile
  # *DOCUMENTATION*
 diff -Nur linux-2.6.35/mm/memory.c linux-2.6.35-ARCH/mm/memory.c
 --- linux-2.6.35/mm/memory.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/mm/memory.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/mm/memory.c	2010-08-20 21:24:47.000000000 +0000
 @@ -2760,6 +2760,26 @@
  }
  
@@ -9847,21 +9881,55 @@ diff -Nur linux-2.6.35/mm/memory.c linux-2.6.35-ARCH/mm/memory.c
   * We enter with non-exclusive mmap_sem (to exclude vma changes,
   * but allow concurrent faults), and pte mapped but not yet locked.
   * We return with mmap_sem still held, but pte unmapped and unlocked.
-@@ -2772,6 +2792,11 @@
+@@ -2772,19 +2792,23 @@
  	spinlock_t *ptl;
  	pte_t entry;
  
-+	if (check_stack_guard_page(vma, address) < 0) {
-+		pte_unmap(page_table);
-+		return VM_FAULT_SIGBUS;
-+	}
++	pte_unmap(page_table);
 +
++	/* Check if we need to add a guard page to the stack */
++	if (check_stack_guard_page(vma, address) < 0)
++		return VM_FAULT_SIGBUS;
++
++	/* Use the zero-page for reads */
  	if (!(flags & FAULT_FLAG_WRITE)) {
  		entry = pte_mkspecial(pfn_pte(my_zero_pfn(address),
  						vma->vm_page_prot));
+-		ptl = pte_lockptr(mm, pmd);
+-		spin_lock(ptl);
++		page_table = pte_offset_map_lock(mm, pmd, address, &ptl);
+ 		if (!pte_none(*page_table))
+ 			goto unlock;
+ 		goto setpte;
+ 	}
+ 
+ 	/* Allocate our own private page. */
+-	pte_unmap(page_table);
+-
+ 	if (unlikely(anon_vma_prepare(vma)))
+ 		goto oom;
+ 	page = alloc_zeroed_user_highpage_movable(vma, address);
+diff -Nur linux-2.6.35/mm/mlock.c linux-2.6.35-ARCH/mm/mlock.c
+--- linux-2.6.35/mm/mlock.c	2010-08-01 22:11:14.000000000 +0000
++++ linux-2.6.35-ARCH/mm/mlock.c	2010-08-20 21:24:47.000000000 +0000
+@@ -167,6 +167,14 @@
+ 	if (vma->vm_flags & VM_WRITE)
+ 		gup_flags |= FOLL_WRITE;
+ 
++	/* We don't try to access the guard page of a stack vma */
++	if (vma->vm_flags & VM_GROWSDOWN) {
++		if (start == vma->vm_start) {
++			start += PAGE_SIZE;
++			nr_pages--;
++		}
++	}
++
+ 	while (nr_pages > 0) {
+ 		int i;
+ 
 diff -Nur linux-2.6.35/mm/swapfile.c linux-2.6.35-ARCH/mm/swapfile.c
 --- linux-2.6.35/mm/swapfile.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/mm/swapfile.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/mm/swapfile.c	2010-08-20 21:24:47.000000000 +0000
 @@ -318,8 +318,10 @@
  	if (offset > si->highest_bit)
  		scan_base = offset = si->lowest_bit;
@@ -9877,7 +9945,7 @@ diff -Nur linux-2.6.35/mm/swapfile.c linux-2.6.35-ARCH/mm/swapfile.c
  		swap_was_freed = __try_to_reclaim_swap(si, offset);
 diff -Nur linux-2.6.35/net/9p/trans_fd.c linux-2.6.35-ARCH/net/9p/trans_fd.c
 --- linux-2.6.35/net/9p/trans_fd.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/net/9p/trans_fd.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/net/9p/trans_fd.c	2010-08-20 21:24:47.000000000 +0000
 @@ -948,7 +948,7 @@
  
  	csocket = NULL;
@@ -9889,7 +9957,7 @@ diff -Nur linux-2.6.35/net/9p/trans_fd.c linux-2.6.35-ARCH/net/9p/trans_fd.c
  		return -ENAMETOOLONG;
 diff -Nur linux-2.6.35/net/ipv4/devinet.c linux-2.6.35-ARCH/net/ipv4/devinet.c
 --- linux-2.6.35/net/ipv4/devinet.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/net/ipv4/devinet.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/net/ipv4/devinet.c	2010-08-20 21:24:47.000000000 +0000
 @@ -1081,6 +1081,7 @@
  		}
  		ip_mc_up(in_dev);
@@ -9900,7 +9968,7 @@ diff -Nur linux-2.6.35/net/ipv4/devinet.c linux-2.6.35-ARCH/net/ipv4/devinet.c
  		if (IN_DEV_ARP_NOTIFY(in_dev)) {
 diff -Nur linux-2.6.35/net/mac80211/mesh_plink.c linux-2.6.35-ARCH/net/mac80211/mesh_plink.c
 --- linux-2.6.35/net/mac80211/mesh_plink.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/net/mac80211/mesh_plink.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/net/mac80211/mesh_plink.c	2010-08-20 21:24:47.000000000 +0000
 @@ -65,7 +65,6 @@
  {
  	atomic_inc(&sdata->u.mesh.mshstats.estab_plinks);
@@ -10035,7 +10103,7 @@ diff -Nur linux-2.6.35/net/mac80211/mesh_plink.c linux-2.6.35-ARCH/net/mac80211/
  			break;
 diff -Nur linux-2.6.35/net/sched/sch_generic.c linux-2.6.35-ARCH/net/sched/sch_generic.c
 --- linux-2.6.35/net/sched/sch_generic.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/net/sched/sch_generic.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/net/sched/sch_generic.c	2010-08-20 21:24:47.000000000 +0000
 @@ -327,6 +327,24 @@
  }
  EXPORT_SYMBOL(netif_carrier_off);
@@ -10063,7 +10131,7 @@ diff -Nur linux-2.6.35/net/sched/sch_generic.c linux-2.6.35-ARCH/net/sched/sch_g
     cheaper.
 diff -Nur linux-2.6.35/net/wireless/mlme.c linux-2.6.35-ARCH/net/wireless/mlme.c
 --- linux-2.6.35/net/wireless/mlme.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/net/wireless/mlme.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/net/wireless/mlme.c	2010-08-20 21:24:47.000000000 +0000
 @@ -44,10 +44,10 @@
  		}
  	}
@@ -10081,7 +10149,7 @@ diff -Nur linux-2.6.35/net/wireless/mlme.c linux-2.6.35-ARCH/net/wireless/mlme.c
  }
 diff -Nur linux-2.6.35/net/wireless/scan.c linux-2.6.35-ARCH/net/wireless/scan.c
 --- linux-2.6.35/net/wireless/scan.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/net/wireless/scan.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/net/wireless/scan.c	2010-08-20 21:24:47.000000000 +0000
 @@ -275,6 +275,7 @@
  {
  	struct cfg80211_registered_device *dev = wiphy_to_dev(wiphy);
@@ -10103,7 +10171,7 @@ diff -Nur linux-2.6.35/net/wireless/scan.c linux-2.6.35-ARCH/net/wireless/scan.c
  			kref_get(&res->ref);
 diff -Nur linux-2.6.35/security/commoncap.c linux-2.6.35-ARCH/security/commoncap.c
 --- linux-2.6.35/security/commoncap.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/security/commoncap.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/security/commoncap.c	2010-08-20 21:24:47.000000000 +0000
 @@ -951,3 +951,4 @@
  	}
  	return ret;
@@ -10111,7 +10179,7 @@ diff -Nur linux-2.6.35/security/commoncap.c linux-2.6.35-ARCH/security/commoncap
 +EXPORT_SYMBOL(cap_file_mmap);
 diff -Nur linux-2.6.35/security/device_cgroup.c linux-2.6.35-ARCH/security/device_cgroup.c
 --- linux-2.6.35/security/device_cgroup.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/security/device_cgroup.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/security/device_cgroup.c	2010-08-20 21:24:47.000000000 +0000
 @@ -515,6 +515,7 @@
  
  	return -EPERM;
@@ -10122,7 +10190,7 @@ diff -Nur linux-2.6.35/security/device_cgroup.c linux-2.6.35-ARCH/security/devic
  {
 diff -Nur linux-2.6.35/security/security.c linux-2.6.35-ARCH/security/security.c
 --- linux-2.6.35/security/security.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/security/security.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/security/security.c	2010-08-20 21:24:47.000000000 +0000
 @@ -376,6 +376,7 @@
  		return 0;
  	return security_ops->path_mkdir(dir, dentry, mode);
@@ -10229,7 +10297,7 @@ diff -Nur linux-2.6.35/security/security.c linux-2.6.35-ARCH/security/security.c
  			    unsigned long prot)
 diff -Nur linux-2.6.35/sound/pci/hda/patch_realtek.c linux-2.6.35-ARCH/sound/pci/hda/patch_realtek.c
 --- linux-2.6.35/sound/pci/hda/patch_realtek.c	2010-08-01 22:11:14.000000000 +0000
-+++ linux-2.6.35-ARCH/sound/pci/hda/patch_realtek.c	2010-08-13 19:30:44.000000000 +0000
++++ linux-2.6.35-ARCH/sound/pci/hda/patch_realtek.c	2010-08-20 21:24:47.000000000 +0000
 @@ -5183,6 +5183,7 @@
  
  static struct snd_pci_quirk beep_white_list[] = {
