@@ -8,7 +8,7 @@ install ()
     fi
     MODULES="${MODULES} virtio_pci virtio_blk"
 
-    BINARIES="fusermount ulockmgr_server mount.fuse ntfs-3g mount.ntfs-3g ntfs-3g.probe"
+    BINARIES="fusermount ulockmgr_server mount.fuse ntfs-3g mount.ntfs-3g ntfs-3g.probe blockdev"
     FILES=""
     #add_dir /tmpfs
     #add_dir /tmpfs.sqfs

@@ -199,7 +199,11 @@ archiso_mount_handler() {
     mount -t tmpfs -o "size=${tmpfs_size}" tmpfs /new_root
     msg "done."
 
-    usbdelay=1
+    usbdelay=5
+    # external drives may need to settle
+    msg "Waiting for devices to settle..."
+    /sbin/udevadm trigger --subsystem-match=usb
+    /sbin/udevadm settle
     usbdelay=$(( ${usbdelay:-0} + 1 ))
     msg "Waiting ${usbdelay}s for USB devices"
     sleep "${usbdelay}"

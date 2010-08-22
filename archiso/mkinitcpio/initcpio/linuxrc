@@ -24,7 +24,7 @@ modprobe_essential_modules
 #mount_initrd_loops
 
 # start hotplugging before hw drivers load
-#mdev_start_hotplug
+mdev_start_hotplug
 
 # Then load drivers for data storage and input devices
 modprobe_usb_modules
@@ -34,7 +34,7 @@ debug_shell
 
 # make sure ext3 partitions are not mounted using ext2 driver,
 # and vfat partitions are not mounted using msdos driver
-echo -e "ext4\next3\next2\nbtrfs\nvfat\n*" >/etc/filesystems
+echo -e "ext4\next3\next2\nvfat\n*" >/etc/filesystems
 
 mkdir -p $UNION
 mkdir -p $MEMORY
@@ -270,11 +270,16 @@ mkdir -p $INITRAMDISK
 # Copy all dev files (found by mdev) to unioned dev directory
 # so at least disk devices exist (your Linux may need them).
 # Two exceptions, do not copy pty* and tty* devs.
-if [ ! -e /dev/console ]; then mknod /dev/console c 5 1; fi
-#cp -fdR /dev . 2>/dev/null
+
 mount -n -o move /proc proc
 mount -n -o move /sys sys
 mount -n -o move /dev dev
+
+if [ ! -e /dev/console ]; then mknod /dev/console c 5 1; fi
+
+if [ "$(cmdline_parameter nohotplug)" ]; then
+    cp -fdR /dev . 2>/dev/null
+fi
 
 # find chroot and init
 if [ -x bin/chroot ]; then  CHROOT=bin/chroot; fi

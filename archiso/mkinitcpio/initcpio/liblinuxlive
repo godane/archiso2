@@ -883,7 +883,7 @@ modprobe_essential_modules()
    modprobe_module ext2
    modprobe_module ext3
    modprobe_module ext4
-   modprobe_module btrfs
+   #modprobe_module btrfs
    modprobe_module reiserfs
    modprobe_module xfs
    modprobe_module vfat
