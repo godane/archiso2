@@ -1,7 +1,7 @@
 # $Id: PKGBUILD 67249 2010-02-05 23:09:52Z thomas $
 # Maintainer: Thomas Bächler <thomas@archlinux.org>
 pkgname=mkinitcpio-busybox
-pkgver=1.16.2
+pkgver=1.17.1
 pkgrel=1
 pkgdesc="base initramfs tools"
 arch=('i686' 'x86_64')
@@ -10,8 +10,8 @@ license=('GPL')
 depends=('glibc')
 source=(http://busybox.net/downloads/busybox-${pkgver}.tar.bz2
         config)
-md5sums=('2ba980f720a5bdce4ec05423519acc35'
-         'aec2fb8b2aaed8678ca872d0e6827070')
+md5sums=('c7fe7533b7fc4018b0b49a05ee0ee601'
+         'c911a42635b507cb4e11c54bd72bb2db')
 
 build() {
   cd "${srcdir}/busybox-${pkgver}"
