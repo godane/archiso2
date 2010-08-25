@@ -15,6 +15,7 @@ xfsprogs
 e2fsprogs
 jfsutils
 reiserfsprogs
+btrfs-progs-unstable
 psmisc
 logrotate
 nano
@@ -80,6 +81,7 @@ perl-error
 libelf
 arch-backup
 sharutils
+cpulimit
 #live-cd
 aufs2
 aufs2-util
@@ -96,8 +98,8 @@ ndiswrapper
 ndiswrapper-utils
 madwifi
 madwifi-utils
-#tiacx
-#tiacx-firmware
+tiacx
+tiacx-firmware
 virtualbox-modules
 virtualbox-ose-additions-modules
 intel-536ep

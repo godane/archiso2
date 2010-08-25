@@ -6,7 +6,15 @@ DEVICE_NAME=${DEVICE##*/} # ex. sda1
 DEVICE_BASE=${DEVICE_NAME%[0-9]} # ex. sda
 CDNAME=$(cmdline_value cdname)
 GRUB=/boot/grub
-LIVEFOLDER="$(dirname $(find /mnt/live/mnt -name packages.list ))" # ex. sr0 or tmp or findiso
+
+if [ -d /mnt/live/mnt/findiso ]; then
+    LIVEFOLDER="$(dirname $(find /mnt/live/mnt/findiso -name packages.list ))" # ex. sr0 or tmp or findiso
+elif [ -d /mnt/live/mnt/tmp ]; then
+    LIVEFOLDER="$(dirname $(find /mnt/live/mnt/tmp -name packages.list ))"
+else
+    LIVEFOLDER="$(dirname $(find /mnt/live/mnt -name packages.list ))"
+fi
+
 ISO=${2}
 
 if [ "${DEVICE}" = "" ]; then
