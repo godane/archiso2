@@ -270,16 +270,16 @@ mkdir -p $INITRAMDISK
 # Copy all dev files (found by mdev) to unioned dev directory
 # so at least disk devices exist (your Linux may need them).
 # Two exceptions, do not copy pty* and tty* devs.
+if [ "$(cmdline_parameter nohotplug)" ]; then
+    cp -fdR /dev . 2>/dev/null
+else
+    mount -n -o move /dev dev
+fi
 
 mount -n -o move /proc proc
 mount -n -o move /sys sys
-mount -n -o move /dev dev
 
 if [ ! -e /dev/console ]; then mknod /dev/console c 5 1; fi
-
-if [ "$(cmdline_parameter nohotplug)" ]; then
-    cp -fdR /dev . 2>/dev/null
-fi
 
 # find chroot and init
 if [ -x bin/chroot ]; then  CHROOT=bin/chroot; fi
