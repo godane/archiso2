@@ -102,6 +102,7 @@ tiacx
 tiacx-firmware
 virtualbox-modules
 virtualbox-ose-additions-modules
+frandom
 intel-536ep
 intel-536ep-utils
 intel-537
