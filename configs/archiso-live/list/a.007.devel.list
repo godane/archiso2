@@ -1,4 +1,5 @@
 base-devel
+kernel26-headers
 doxygen
 ccache
 cmake
