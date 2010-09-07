@@ -2,9 +2,11 @@
 # Maintainer : Ionut Biru <ibiru@archlinux.org>
 # Contributor: Hugo Doria <hugo@archlinux.org>
 
+#pkgbase=mplayer
+#pkgname=('mplayer' 'mencoder')
 pkgname=mplayer
-pkgver=31774
-pkgrel=1live
+pkgver=32025
+pkgrel=2live
 pkgdesc="A movie player for linux"
 arch=('i686' 'x86_64')
 depends=('libxxf86dga' 'libmad' 'cdparanoia' 'libxinerama' 'sdl' 'lame' 'libtheora' 'xvidcore' 'libmng' 'libxss'
@@ -12,10 +14,10 @@ depends=('libxxf86dga' 'libmad' 'cdparanoia' 'libxinerama' 'sdl' 'lame' 'libtheo
          'opencore-amr' 'libdca' 'a52dec' 'schroedinger' 'libvpx')
 license=('GPL')
 url="http://www.mplayerhq.hu/"
-makedepends=('unzip' 'mesa' 'live-media>=2010.01.13')
+makedepends=('unzip' 'mesa' 'live-media>=2010.01.13' 'yasm')
 backup=('etc/mplayer/codecs.conf' 'etc/mplayer/input.conf')
 source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz mplayer.desktop mplayer.png)
-md5sums=('3ebcfb6f3fdcaf884877dcb41f20514c'
+md5sums=('0b66e1f7d26e5f5ffb2b15d0313da71b'
          'c0d6ef795cf6de48e3b87ff7c23f0319'
          'd00874ccc644b7f43d6ef1c942fcef28')
 
@@ -47,6 +49,11 @@ build() {
   [ "$CARCH" = "i686" ] &&  sed 's|-march=i486|-march=i686|g' -i config.mak
 
   make || return 1
+}
+
+#package_mplayer() {
+package() {
+  cd ${srcdir}/${pkgname}
   make -j1 DESTDIR=${pkgdir} install || return 1
   install -Dm644 etc/{codecs.conf,input.conf,example.conf} ${pkgdir}/etc/mplayer/ || return 1
   install -dm755 ${pkgdir}/usr/share/mplayer/
@@ -55,4 +62,16 @@ build() {
   #desktop file  FS#14770
   install -Dm644 ${srcdir}/mplayer.desktop ${pkgdir}/usr/share/applications/mplayer.desktop || return 1
   install -Dm644 ${srcdir}/mplayer.png ${pkgdir}/usr/share/pixmaps/mplayer.png || return 1
+  
+  # Mencoder goes in a splited package.
+  #rm ${pkgdir}/usr/bin/mencoder
 }
+
+#package_mencoder() {
+#  cd ${srcdir}/${pkgbase}
+#  make -j1 DESTDIR=${pkgdir} install || return 1
+#  rm -R ${pkgdir}/usr/share
+#  rm -R ${pkgdir}/etc
+#  rm -R ${pkgdir}/usr/lib
+#  rm ${pkgdir}/usr/bin/mplayer
+#}
