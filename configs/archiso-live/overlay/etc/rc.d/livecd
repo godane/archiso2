@@ -9,7 +9,9 @@ fix_rc_conf ()
 do_makeuser ()
 {
     stat_busy "Making the default user arch"
-    cp -af /etc/skel /home/arch
+    mkdir -p /home/arch
+    cp -r /etc/skel/.[a-zA-Z0-9]* /home/arch
+    cp -r /etc/skel/[a-zA-Z0-9]* /home/arch
     chown -R 1000:100 /home/arch
     stat_done
 }
@@ -17,7 +19,9 @@ do_makeuser ()
 do_rootuser ()
 {
     stat_busy "Making the default root user"
-    cp -af /etc/skel /root
+    mkdir -p /root
+    cp -r /etc/skel/.[a-zA-Z0-9]* /root
+    cp -r /etc/skel/[a-zA-Z0-9]* /root
     chown -R root:root /root
     stat_done
 }
@@ -33,7 +37,9 @@ do_fix_perms ()
 case "$1" in
   start)
     fix_rc_conf
-    do_makeuser
+    if [ ! -d /home/arch ]; then
+        do_makeuser
+    fi
     do_fix_perms
     ;;
 esac
