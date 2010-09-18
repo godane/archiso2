@@ -125,3 +125,17 @@ usr/share/inkscape/tutorials
 usr/share/ghostscript/8.71/doc
 usr/share/ghostscript/8.71/examples
 usr/share/gnome/help
+#lxde-wallpapers
+usr/share/lxde/wallpapers/lxde_green.jpg
+usr/share/lxde/wallpapers/lxde_red.jpg
+#ImageMagick-docs
+usr/share/ImageMagick-6.6.4/ChangeLog
+usr/share/ImageMagick-6.6.4/LICENSE
+usr/share/ImageMagick-6.6.4/NEWS.txt
+#backup-files
+etc/group~
+etc/gshadow~
+etc/passwd~
+etc/shadow~
+etc/pacman.conf.pacorig
+etc/pacman.conf
