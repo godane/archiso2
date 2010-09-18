@@ -315,23 +315,20 @@ _mvstuff () {
             fi
             if [ -f "${PROFILE}/list/move" ]; then
                 cat "${PROFILE}/list/move" | grep -v "^#" | while read move; do
-                    if [ -d "${modules_dir}/${m}/${move}" ]; then
+                    if [ -e "${modules_dir}/${m}/${move}" ]; then
                         info "Moving $move from ${m} to ${modmove}"
                         move_dir=$(dirname ${move})
                             if [ ! -d ${modules_dir}/${modmove}/${move_dir} ]; then
                                 mkdir -p ${modules_dir}/${modmove}/${move_dir}
                             fi
-                        cp -a ${modules_dir}/${m}/${move} ${modules_dir}/${modmove}/${move_dir}
+                        cp -af ${modules_dir}/${m}/${move} ${modules_dir}/${modmove}/${move_dir}
                         rm -Rf ${modules_dir}/${m}/${move}
                     fi
-                    info "Moving .a files from ${m} to ${modmove}"
-                    if [ ! -d ${modules_dir}/${modmove}/usr/lib ]; then
-                        mkdir -p ${modules_dir}/${modmove}/usr/lib
-                    fi
-                    find ${modules_dir}/${m}/usr/lib -maxdepth 1 -name "*.*a" -exec cp -af {} ${modules_dir}/${modmove}/usr/lib \;
-                    find ${modules_dir}/${m}/usr/lib -maxdepth 1 -name "*.*a" -exec rm -f {} \;
                 done
             fi
+                    info "Moving .a files from ${m} to ${modmove}"
+                    find ${modules_dir}/${m}/usr/lib -maxdepth 1 -name "*.*a" -exec cp -af {} ${modules_dir}/${modmove}/usr/lib \;
+                    find ${modules_dir}/${m}/usr/lib -maxdepth 1 -name "*.*a" -exec rm -f {} \;
         done
     fi
 }
