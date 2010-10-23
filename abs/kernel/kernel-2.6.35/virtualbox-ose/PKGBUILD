@@ -2,14 +2,15 @@
 #Maintainer: Ionut Biru <ibiru@archlinux.org>
 pkgbase=('virtualbox-ose')
 pkgname=('virtualbox-ose' 'virtualbox-modules' 'virtualbox-ose-additions' 'virtualbox-ose-additions-modules')
-pkgver=3.2.8
+pkgver=3.2.10
 pkgrel=2live
 arch=('i686')
 url='http://virtualbox.org'
 license=('GPL' 'custom')
 makedepends=('libstdc++5' 'bin86' 'dev86' 'iasl' 'libxslt' 'libxml2'
              'libxcursor' 'qt' 'libidl2' 'sdl_ttf' 'alsa-lib' 'pulseaudio'
-             'hal' 'libxtst' 'xalan-c' 'sdl' 'libxmu' 'curl' 'python' 'kernel26-headers>=2.6.35' 'mesa' 'libxrandr' 'libxinerama' 'libvncserver')
+             'hal' 'libxtst' 'xalan-c' 'sdl' 'libxmu' 'curl' 'python2' 'kernel26-headers>=2.6.35' 'mesa' 'libxrandr' 'libxinerama' 'libvncserver')
+[[ $CARCH == "x86_64" ]] && makedepends=("${makedepends[@]}" 'gcc-multilib' 'lib32-glibc')
 source=(http://download.virtualbox.org/virtualbox/$pkgver/VirtualBox-$pkgver-OSE.tar.bz2
         '60-virtualbox.rules' '60-vboxguest.rules' 'LocalConfig.kmk' 'VirtualBox-3.2.0-gcc-4.5-warning-workaround.patch')
 _kernver=2.6.35-ARCH
@@ -19,7 +20,6 @@ build() {
     patch -Np1 -i ${srcdir}/VirtualBox-3.2.0-gcc-4.5-warning-workaround.patch
 
     cp "$srcdir/LocalConfig.kmk" .
-    sed -i 's/python2.4/python2.6/g' configure
 
     ./configure --with-linux=/usr/src/linux-${_kernver}
     source ./env.sh
@@ -44,7 +44,7 @@ package_virtualbox-ose() {
                 'libgl: For Shared OpenGL'
                 'libxt: For Shared Clipboard'
 	        'pulseaudio: For PulseAudio Support'
-	        'python: For Python Support')
+	        'python2: For Python Support')
     provides=("virtualbox=${pkgver}")
     install=virtualbox.install
     source "$srcdir/VirtualBox-${pkgver}_OSE/env.sh"
@@ -143,9 +143,9 @@ package_virtualbox-ose-additions(){
 	"$pkgdir"/usr/bin/VBoxClient-all
     install -m755 -D "$srcdir"/VirtualBox-${pkgver}_OSE/src/VBox/Additions/x11/Installer/vboxclient.desktop \
 	"$pkgdir"/etc/xdg/autostart/vboxclient.desktop
-    install -D vboxmouse_drv_18.so \
+    install -D vboxmouse_drv_19.so \
 	"$pkgdir/usr/lib/xorg/modules/input/vboxmouse.so"
-    install -D vboxvideo_drv_18.so \
+    install -D vboxvideo_drv_19.so \
 	"$pkgdir/usr/lib/xorg/modules/drivers/vboxvideo.so"
     install -d "$pkgdir/usr/lib/xorg/modules/dri"
     install -m755 VBoxOGL*.so "$pkgdir/usr/lib"
@@ -178,7 +178,7 @@ package_virtualbox-ose-additions-modules(){
 
     sed -i -e "s/KERNEL_VERSION='.*'/KERNEL_VERSION='${_kernver}'/" "$startdir/virtualbox-ose-additions-modules.install"
 }
-md5sums=('84de65bddb365ba61eddd3b112b303e5'
+md5sums=('5aad764cd4e886f9d80d7bde42163c7a'
          '641bd2d65f0183ef5897d8dd0322f7bc'
          'ed1341881437455d9735875ddf455fbe'
          '25b848ac21bf028f4f49b5e179f2afe6'
