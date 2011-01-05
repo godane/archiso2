@@ -43,7 +43,7 @@ libxklavier
 printproto
 imagemagick
 scrot
-virtualbox-ose-additions
+virtualbox-guest-additions
 volwheel
 xcompmgr
 notification-daemon
@@ -72,7 +72,7 @@ ttf-dejavu
 #mini-wm
 fluxbox
 icewm
-awesome
+#awesome
 openbox
 obmenu
 obconf

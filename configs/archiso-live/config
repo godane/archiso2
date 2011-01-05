@@ -9,13 +9,13 @@ LABEL="Archiso-live"
 PUBLISHER="http://godane.wordpress.com/"
 #AUTHOR="Christopher Rogers aka Godane"
 # when using mksquashfs with lzma 4.0
-NOLZMA=n
+NOXZ=n
 
-if [ "${NOLZMA}" = "y" ]; then
+if [ "${NOXZ}" = "y" ]; then
     EXT="sqfs"
-    MKOPTION="-comp gzip"
+    MKOPTION="-comp gzip -b 256k"
 else
-    EXT="lzm"
-    MKOPTION="-comp lzma -b 256k"
+    EXT="xz"
+    MKOPTION="-comp xz -Xbcj x86 -b 256k"
 fi
 

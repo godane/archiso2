@@ -100,8 +100,7 @@ madwifi
 madwifi-utils
 tiacx
 tiacx-firmware
-virtualbox-modules
-virtualbox-ose-additions-modules
+virtualbox-guest-modules
 frandom
 intel-536ep
 intel-536ep-utils
