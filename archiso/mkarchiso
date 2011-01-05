@@ -267,7 +267,12 @@ _imgprepare () {
 _ungzipped () {
     for m in ${UNION_MODULES}; do
         info "Uncompressing .gz files in ${m}"
-        find -H ${modules_dir}/${m}/ -name "*.gz" -exec gunzip -qf {} \; 2>/dev/null
+	if [ -d ${modules_dir}/${m}/usr/share/man ]; then
+	        find -H ${modules_dir}/${m}/usr/share/man -name "*.gz" -exec gunzip -qf {} \; 2>/dev/null
+	fi
+	if [ -d ${modules_dir}/${m}/usr/share/fonts ]; then
+		find -H ${modules_dir}/${m}/usr/share/fonts -name "*.gz" -exec gunzip -qf {} \; 2>/dev/null
+	fi
         if [ -f ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir ]; then
             sed -i "s|.pcf.gz|.pcf|g" ${modules_dir}/${m}/usr/share/fonts/misc/fonts.dir
         fi
