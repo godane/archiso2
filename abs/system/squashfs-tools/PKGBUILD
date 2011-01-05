@@ -1,0 +1,34 @@
+# $Id: PKGBUILD 96914 2010-10-25 15:28:14Z pierre $
+# Maintainer: Aaron Griffin <aaron@archlinux.org>
+# Original TU: Jeff Mickey <j@codemac.net>
+# Contributor: ciccio.a
+
+pkgname=squashfs-tools
+pkgver=4.1
+pkgrel=2live
+pkgdesc="Tools for squashfs, a highly compressed read-only filesystem for Linux."
+url="http://squashfs.sourceforge.net"
+license=("GPL")
+arch=('i686' 'x86_64')
+depends=('zlib' 'glibc' 'lzo2' 'xz' 'lzma')
+source=("http://downloads.sourceforge.net/sourceforge/squashfs/squashfs${pkgver}.tar.gz"
+	squashfs-xz.patch)
+md5sums=('8e1b2b96f5d5f3fe48fef226ae8cd341'
+         'f53865551dca37e4bdfd4a9024a41574')
+
+build() {
+    cd ${srcdir}/squashfs${pkgver}/${pkgname}
+    patch -Np2 -i ${srcdir}/squashfs-xz.patch
+    sed -i 's|^#XZ_SUPPORT = 1|XZ_SUPPORT = 1|' Makefile
+    sed -i 's|^#LZMA_XZ_SUPPORT = 1|LZMA_XZ_SUPPORT = 1|' Makefile
+    #sed -i 's|^LZMA_SUPPORT = 1|#LZMA_SUPPORT = 1|' Makefile
+    #sed -i 's|^LZMA_DIR = ../../../../LZMA/lzma465|#LZMA_DIR = ../../../../LZMA/lzma465|' Makefile
+    sed -i 's|^#LZO_SUPPORT = 1|LZO_SUPPORT = 1|' Makefile
+    make
+}
+
+package() {
+    cd ${srcdir}/squashfs${pkgver}/${pkgname}
+    install -Dm755 mksquashfs ${pkgdir}/sbin/mksquashfs
+    install -m755 unsquashfs ${pkgdir}/sbin/unsquashfs
+}
