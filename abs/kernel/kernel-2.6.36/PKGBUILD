@@ -23,7 +23,7 @@ source=(ftp://ftp.kernel.org/pub/linux/kernel/v2.6/linux-$_basekernel.tar.bz2
         # standard config files for mkinitcpio ramdisk
         kernel26.preset)
 md5sums=('61f3739a73afb6914cb007f37fb09b62'
-         '998b597b8659f1ac2667bbc13d1905b8'
+         'fab8326c7b72bce40774933e9f495f79'
          '078824da00b8cb4a75dfc9dbbcbc58ca'
          'bea1ce4527a0b155f746347c0ad08e31'
          '96f856384ac1d7c2ac55aa8a5bea3a3b'
